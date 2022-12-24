@@ -10,6 +10,9 @@ PIN_COLOR_ARC = (255, 100, 100)
 PIN_WIDTH = 2
 
 class CPin:
+    def __call__(self):
+        return 'CPin'
+
     def __init__(self, offset: float, degree: float):
         self.offset: float = offset
         self.degree: float = degree
@@ -18,12 +21,11 @@ class CPin:
         self.is_fixed: bool = True
         self.is_drive: bool = True
 
-        self.x: float = 0.0
-        self.y: float = 0.0
+        self.pt_parent:Tuple[float,float] = (0.0, 0.0)
 
-    def set_parent_pos(self, x: float, y: float):
-        self.x = x
-        self.y = y
+
+    def set_parent_pos(self, pt_parent:Tuple[float,float]):
+        self.pt_parent = pt_parent
 
     def set_degree(self, degree: float):
         self.degree = degree
@@ -32,8 +34,10 @@ class CPin:
         pass
 
     def draw(self, img):
+        pt_int =tuple(map(int,self.pt_parent)) 
+
         cv2.circle(img, 
-            center = (int(self.x), int(self.y)), 
+            center = pt_int, 
             radius = PIN_RADIUS,
             color = PIN_COLOR,
             thickness =  PIN_WIDTH,
@@ -41,7 +45,7 @@ class CPin:
             shift = 0)
 
         cv2.ellipse(img, 
-            center = (self.x, self.y), 
+            center = pt_int, 
             axes = (PIN_RADIUS,PIN_RADIUS), 
             angle = 0, 
             startAngle = 0,
