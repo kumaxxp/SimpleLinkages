@@ -3,7 +3,7 @@ import numpy as np
 
 import math
 from typing import Tuple
-from operator import add
+from typing import List
 
 from cpin import CPin
 
@@ -11,9 +11,9 @@ LINK_COLOR = (100, 100, 100)
 LINK_WIDTH = 2
 
 class CLink:
-    def __init__(self, length: float):
+    def __init__(self, length: float, pins:List[CPin]):
         self.length = length
-        self.pins: list[CPin] = []
+        self.pins: List[CPin] = pins
 
         # 原点
         self.org_pos: Tuple[float, float] = (0, 0)
@@ -23,8 +23,8 @@ class CLink:
         self._parent_pos: Tuple[float, float] = (0, 0)
 
         # pinを配置
-        self.init_pin(offset = 0, degree = 30)
-        self.init_pin(offset = 300, degree = 90)
+#        self.init_pin(offset = 0, degree = 30)
+#        self.init_pin(offset = 300, degree = 90)
 
     def init_pin(self, offset: float, degree: float):
         pin = CPin(offset=offset, degree=degree)
@@ -70,6 +70,48 @@ class CLink:
         for pin in self.pins:
             pin.parent_pos = pos
 
+# 初期化データ
+data = [
+    {
+        "length": 500.0,
+        "pins": [
+            {
+                "offset": 0,
+                "degree": 45,
+                "enable_rotation": True,
+                "is_fixed": True,
+                "is_drive": True
+            },
+            {
+                "offset": 500,
+                "degree": 30,
+                "enable_rotation": True,
+                "is_fixed": True,
+                "is_drive": True
+            }
+        ]
+    },
+    {
+        "length": 200.0,
+        "pins": [
+            {
+                "offset": 0.0,
+                "degree": 45,
+                "enable_rotation": True,
+                "is_fixed": True,
+                "is_drive": True
+            },
+            {
+                "offset": 200.0,
+                "degree": 45,
+                "enable_rotation": True,
+                "is_fixed": True,
+                "is_drive": True
+            }
+        ]
+    }
+]    
+
 
 if __name__ == '__main__':
 
@@ -80,16 +122,14 @@ if __name__ == '__main__':
     img = np.zeros((600,1000,3), np.uint8)
     img[:,:,:] = 255
 
-    pos:Tuple[float,float] = (200.0,200.0)
-    Link = CLink(length = 300)
-    Link.parent_pos = pos
-    Link.calculate_coordinates()
+    links = [CLink(link_data["length"], [CPin(**pin_data) for pin_data in link_data["pins"]]) for link_data in data]
+
+    pos:Tuple[float,float] = (100.0,400.0)
+    for link in links:
+        link.parent_pos = pos
+        link.calculate_coordinates()
 
     pos2:Tuple[float,float] = (100.0,400.0)
-    Link2 = CLink(length = 200)
-    Link2.parent_pos = pos2
-    Link2.calculate_coordinates()
-
 
     while True:
 
@@ -99,8 +139,8 @@ if __name__ == '__main__':
         # 角度変更
         deg = cv2.getTrackbarPos('deg', 'panel') 
 
-        Link.draw(image = img)
-        Link2.draw(image = img)
+        for link in links:
+            link.draw(image = img)
 
         cv2.imshow('link test', img)
 
