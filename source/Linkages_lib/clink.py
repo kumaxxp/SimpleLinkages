@@ -29,6 +29,10 @@ class CLink:
 
         self.pins.append(pin) 
 
+    def calculate_coordinates():
+        # 座標計算。親座標にしたがって動く
+        pass
+
     def draw(self, img):
 
         pt_org_int =tuple(map(int,self.pt_org)) 

@@ -19,6 +19,7 @@ Simple Linkages for my robots
 
 以下のようなディレクトリ構成にします。
 
+```
 .
 ├── Linkages_lib
 │   ├── __init__.py
@@ -29,6 +30,8 @@ Simple Linkages for my robots
 ├── Linkages_lib_cli
 │   └── call.py
 └── setup.py
+
+```
 
 ## 実装しながら作る
 
