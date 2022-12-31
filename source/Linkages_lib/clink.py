@@ -22,10 +22,6 @@ class CLink:
         # 親座標
         self._parent_pos: Tuple[float, float] = (0, 0)
 
-        # pinを配置
-#        self.init_pin(offset = 0, degree = 30)
-#        self.init_pin(offset = 300, degree = 90)
-
     def init_pin(self, offset: float, degree: float):
         pin = CPin(offset=offset, degree=degree)
         self.pins.append(pin)
@@ -69,6 +65,23 @@ class CLink:
         # リンクの角度に影響を受けるはずなので、後ほど修正する
         for pin in self.pins:
             pin.parent_pos = pos
+
+    @property
+    def org_pos(self) -> Tuple[float, float]:
+        return self._org_pos
+
+    @org_pos.setter
+    def org_pos(self, pos: Tuple[float, float]):
+        self._org_pos = pos
+
+    @property
+    def oop_pos(self) -> Tuple[float, float]:
+        return self._oop_pos
+
+    @oop_pos.setter
+    def oop_pos(self, pos: Tuple[float, float]):
+        self._oop_pos = pos
+
 
 # 初期化データ
 data = [
