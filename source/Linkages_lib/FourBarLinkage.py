@@ -16,11 +16,13 @@ LINK_COLOR = (100, 100, 100)
 LINK_COLOR_G = (0, 0, 255)
 LINK_WIDTH = 2
 
-PIN_RADIUS = 20
+PIN_RADIUS = 30
+PIN_RADIUS_PHI = 20
 PIN_COLOR = (100, 100, 100)
 PIN_COLOR_ARC = (255, 100, 100)
 PIN_COLOR_PHI1 = (100, 255, 100)
 PIN_COLOR_PHI2 = (100, 100, 255)
+PIN_TEXT = (0, 0, 0)
 PIN_WIDTH = 1
 
 # 四節リンクを表すクラス
@@ -30,6 +32,7 @@ class FourBarLinkage:
         self.b = b
         self.c = c
         self.d = d
+        self.e = b
         self.phi = math.radians(angle_phi)
         
         # 各点の座標を表す変数を定義する
@@ -100,6 +103,14 @@ class FourBarLinkage:
         self.angle_phi1 = math.degrees(math.atan2(self.B[1], self.B[0]))
         self.angle_phi2 = self.angle_phi - self.angle_phi1
 
+        # -------------------------------------
+        # 頂点Eを計算する
+        Ex = self.A[0] - math.cos(theta) * self.e
+        Ey = -math.sin(theta) * self.e
+
+        self.E = (Ex,Ey) 
+
+
         a_chk = math.sqrt((self.A[0] - self.D[0])**2 + (self.A[1] - self.D[1])**2)
         b_chk = math.sqrt((self.B[0] - self.A[0])**2 + (self.B[1] - self.A[1])**2)
         c_chk = math.sqrt((self.C[0] - self.B[0])**2 + (self.C[1] - self.B[1])**2)
@@ -126,32 +137,56 @@ class FourBarLinkage:
         pos_B_int = self._convert_coordinate(self.B)
         pos_C_int = self._convert_coordinate(self.C)
         pos_D_int = self._convert_coordinate(self.D)
+        pos_E_int = self._convert_coordinate(self.E)
 
         # linkを描画する
         cv2.line(image, pt1=pos_A_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B_int, pt2=pos_C_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_A_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 頂点Dを描画する。Φ/Φ1/Φ2を表示
 
-        cv2.circle(image, center=pos_D_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.ellipse(image, center=pos_D_int, axes=(PIN_RADIUS, PIN_RADIUS),
-            angle=0, startAngle=0, endAngle=-int(self.angle_phi), color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
-
+        cv2.circle(image, center=pos_A_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.ellipse(image, center=pos_A_int, axes=(PIN_RADIUS, PIN_RADIUS),
             angle=0, startAngle=-180, endAngle=int(self.angle_A)-180, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
-
-        cv2.ellipse(image, center=pos_C_int, axes=(PIN_RADIUS, PIN_RADIUS),
-            angle=0, startAngle=180-int(self.angle_phi), endAngle=self.angle_phi+self.angle_C-180, color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
-
-#        cv2.ellipse(image, center=pos_B_int, axes=(PIN_RADIUS, PIN_RADIUS),
-#            angle=0, startAngle=int(self.angle_A), endAngle=-int(-180-self.angle_B+self.angle_A), color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
 
         cv2.circle(image, center=pos_B_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.ellipse(image, center=pos_B_int, axes=(PIN_RADIUS, PIN_RADIUS),
             angle=0, startAngle=int(self.angle_A), endAngle=int(self.angle_B+self.angle_A), color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+
+        cv2.circle(image, center=pos_C_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.ellipse(image, center=pos_C_int, axes=(PIN_RADIUS, PIN_RADIUS),
+            angle=0, startAngle=180-int(self.angle_phi), endAngle=self.angle_phi+self.angle_C-180, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+
+        cv2.circle(image, center=pos_D_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.ellipse(image, center=pos_D_int, axes=(PIN_RADIUS, PIN_RADIUS),
+            angle=0, startAngle=0, endAngle=-int(self.angle_phi), color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+        cv2.ellipse(image, center=pos_D_int, axes=(PIN_RADIUS_PHI, PIN_RADIUS_PHI),
+            angle=0, startAngle=-int(self.angle_phi1), endAngle=-int(self.angle_phi2)-int(self.angle_phi1), color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
+        cv2.ellipse(image, center=pos_D_int, axes=(PIN_RADIUS_PHI, PIN_RADIUS_PHI),
+            angle=0, startAngle=0, endAngle=-int(self.angle_phi1), color=PIN_COLOR_PHI1, thickness=-1, lineType=cv2.LINE_AA)
+
+        cv2.circle(image, center=pos_E_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        # 対角線
+        cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        # テキスト
+        cv2.putText(img = image, text = 'A', org = pos_A_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'B', org = pos_B_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'C', org = pos_C_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'D', org = pos_D_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'E', org = pos_E_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+#        cv2.ellipse(image, center=pos_B_int, axes=(PIN_RADIUS, PIN_RADIUS),
+#            angle=0, startAngle=int(self.angle_A), endAngle=-int(-180-self.angle_B+self.angle_A), color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
 
 #        cv2.circle(image, center=pos_C_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 #        cv2.ellipse(image, center=pos_C_int, axes=(PIN_RADIUS, PIN_RADIUS),
@@ -162,7 +197,7 @@ if __name__ == '__main__':
 
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
-    four_bar_linkage = FourBarLinkage(a=400, b=100, c=400, d=100, angle_phi=60)
+    four_bar_linkage = FourBarLinkage(a=100, b=150, c=100, d=150, angle_phi=60)
     four_bar_linkage.update_positions()
     print(four_bar_linkage.D)  # (0, 0)
     print(four_bar_linkage.A)  # (10, 0)
@@ -192,7 +227,7 @@ if __name__ == '__main__':
 
 
     cv2.namedWindow('panel')
-    cv2.createTrackbar('deg', 'panel', 0, 360, lambda x: None)
+    cv2.createTrackbar('deg', 'panel', 90, 360, lambda x: None)
 
     while True:
 
