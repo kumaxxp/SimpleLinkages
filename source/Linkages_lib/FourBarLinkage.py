@@ -55,25 +55,10 @@ class FourBarLinkage:
     def update_positions(self):
         # 点Cを求める
         self.C = (self.d * math.cos(self.phi), self.d * math.sin(self.phi))
+        h = math.sqrt((self.C[0] - self.a)**2 + self.C[1]**2)
 
-        # 三角形ABCを作る
-        AB = self.a - self.C[0]
-        BC = self.c
-        AC = self.d
-        
-        # 余弦定理で角Aを求める
-        cos_A = (AB**2 + AC**2 - BC**2) / (2 * AB * AC)
-        
-        # コサイン値が-1から1の範囲内に収まっているかを確認する
-        if cos_A < -1 or cos_A > 1:
-            # 範囲外の場合は、-1から1の範囲内に修正する
-            cos_A = max(-1, min(cos_A, 1))
-
-        A = math.acos(cos_A)
-        self.angle_A = math.degrees(A)
-
-        # 余弦定理で角Cを求める
-        cos_B = (BC**2 + AC**2 - AB**2) / (2 * BC * AC)
+        # 余弦定理で角Bを求める
+        cos_B = (self.b**2 + self.c**2 - h**2) / (2 * self.b * self.c)
         # コサイン値が-1から1の範囲内に収まっているかを確認する
         if cos_B < -1 or cos_B > 1:
             # 範囲外の場合は、-1から1の範囲内に修正する
@@ -81,19 +66,46 @@ class FourBarLinkage:
 
         B = math.acos(cos_B)
         self.angle_B = math.degrees(B)
+
+        cos_DCA = (self.d**2 + h**2 - self.a**2) / (2 * self.d * h)
+        # コサイン値が-1から1の範囲内に収まっているかを確認する
+        if cos_DCA < -1 or cos_DCA > 1:
+            # 範囲外の場合は、-1から1の範囲内に修正する
+            cos_DCA = max(-1, min(cos_DCA, 1))
+
+        DCA = math.acos(cos_DCA)
+        angle_DCA = math.degrees(DCA)
+
+        cos_ACB = (self.c**2 + h**2 - self.b**2) / (2 * self.c * h)
+        # コサイン値が-1から1の範囲内に収まっているかを確認する
+        if cos_ACB < -1 or cos_ACB > 1:
+            # 範囲外の場合は、-1から1の範囲内に修正する
+            cos_ACB = max(-1, min(cos_ACB, 1))
+
+        ACB = math.acos(cos_ACB)
+        angle_ACB = math.degrees(ACB)
+
+        self.angle_C = angle_DCA + angle_ACB
+
+        self.angle_A = 360 - self.angle_C - self.angle_B - self.angle_phi
         
         # 点Bを求める
-        x = self.a - AC * math.cos(A)
-        y = AC * math.sin(A)
+        theta = math.radians(180.0-self.angle_A)
+        x = self.a + self.b * math.cos(theta)
+        y = self.b * math.sin(theta)
         
         self.B = (x, y)
-        
+
         # Θ1の角度を求める
         self.angle_phi1 = math.degrees(math.atan2(self.B[1], self.B[0]))
         self.angle_phi2 = self.angle_phi - self.angle_phi1
 
-        DBA = 180 - self.angle_A - self.angle_phi1
-        print(self.angle_A, self.angle_B, self.angle_phi, self.angle_phi1, self.angle_phi2, DBA)
+        a_chk = math.sqrt((self.A[0] - self.D[0])**2 + (self.A[1] - self.D[1])**2)
+        b_chk = math.sqrt((self.B[0] - self.A[0])**2 + (self.B[1] - self.A[1])**2)
+        c_chk = math.sqrt((self.C[0] - self.B[0])**2 + (self.C[1] - self.B[1])**2)
+        d_chk = math.sqrt((self.D[0] - self.C[0])**2 + (self.D[1] - self.C[1])**2)
+    #    print(a_chk, b_chk, c_chk, d_chk)
+        print(self.C[0], self.C[1])
 
     def set_phi(self, angle):
         # Φの角度は頂点Dの角度として保存する
@@ -107,7 +119,7 @@ class FourBarLinkage:
         pos_int_y = -int(pos[1]) + offset_y
         pos_int = (pos_int_x, pos_int_y)
         return pos_int
-        
+
     def draw(self, image: np.ndarray) -> None:
 
         pos_A_int = self._convert_coordinate(self.A)
@@ -132,17 +144,25 @@ class FourBarLinkage:
             angle=0, startAngle=-180, endAngle=int(self.angle_A)-180, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
         cv2.ellipse(image, center=pos_C_int, axes=(PIN_RADIUS, PIN_RADIUS),
-            angle=0, startAngle=180-int(self.angle_phi), endAngle=-int(180-self.angle_phi+self.angle_B), color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
+            angle=0, startAngle=180-int(self.angle_phi), endAngle=self.angle_phi+self.angle_C-180, color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
 
 #        cv2.ellipse(image, center=pos_B_int, axes=(PIN_RADIUS, PIN_RADIUS),
 #            angle=0, startAngle=int(self.angle_A), endAngle=-int(-180-self.angle_B+self.angle_A), color=PIN_COLOR_PHI2, thickness=-1, lineType=cv2.LINE_AA)
+
+        cv2.circle(image, center=pos_B_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.ellipse(image, center=pos_B_int, axes=(PIN_RADIUS, PIN_RADIUS),
+            angle=0, startAngle=int(self.angle_A), endAngle=int(self.angle_B+self.angle_A), color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+
+#        cv2.circle(image, center=pos_C_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+#        cv2.ellipse(image, center=pos_C_int, axes=(PIN_RADIUS, PIN_RADIUS),
+#            angle=0, startAngle=int(self.angle_phi), endAngle=int(self.angle_B+self.angle_phi), color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
 
 if __name__ == '__main__':
 
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
-    four_bar_linkage = FourBarLinkage(a=200, b=100, c=160, d=120, angle_phi=60)
+    four_bar_linkage = FourBarLinkage(a=400, b=100, c=400, d=100, angle_phi=60)
     four_bar_linkage.update_positions()
     print(four_bar_linkage.D)  # (0, 0)
     print(four_bar_linkage.A)  # (10, 0)
