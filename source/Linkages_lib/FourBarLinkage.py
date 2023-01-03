@@ -247,6 +247,17 @@ class FourBarLinkage:
         cv2.putText(img = image, text = 'E', org = pos_E_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
+        # 座標表示
+        pos_int = (int(pos_E_int[0]), int(pos_E_int[1]) + 20)
+        cv2.putText(img = image, text = str(self.E), 
+            org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+        # ガイド用の楕円を描く
+        pos_Guide = (pos_D_int[0], pos_D_int[1] + 250)
+        cv2.ellipse(image, center=pos_Guide, axes=(100, 20),
+            angle=0, startAngle=0, endAngle=360, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA)
+
 
     # すべてのポイントの座標を変換する
     def transform(self, H):
@@ -354,7 +365,8 @@ if __name__ == '__main__':
 
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
-    four_bar_linkage = FourBarLinkage(a=300, b=80, c=300, d=80, e=150, angle_phi=60)
+#    four_bar_linkage = FourBarLinkage(a=300, b=80, c=300, d=80, e=150, angle_phi=60)
+    four_bar_linkage = FourBarLinkage(a=100, b=100, c=100, d=100, e=150, angle_phi=60)
     four_bar_linkage.update_positions()
     # ----------------------------
 
