@@ -22,95 +22,54 @@ PIN_WIDTH = 1
 
 # 四節リンクを表すクラス
 class FourBarLinkage:
-    def __init__(self, a, b, c, d, e, angle_phi):
+    def __init__(self, a, b, e, angle_phi, angle_delta):
         self.a = a
         self.b = b
-        self.c = c
-        self.d = d
+        self.c = a
+        self.d = b
         self.e = e
         self.phi = math.radians(angle_phi)
-        
+        self.delta = math.radians(angle_delta)
+
         # 各点の座標を表す変数を定義する
         self.D = (0, 0)
         self.A = (a, 0)
-        self.B = (0, 0)
-        self.C = (d * math.cos(angle_phi), d * math.sin(angle_phi))
+        self.B = (a + b * math.cos(self.phi), b * math.sin(self.phi))
+        self.C = (b * math.cos(self.phi), b * math.sin(self.phi))
+        self.E = (a + (b + e) * math.cos(self.phi), (b + e) * math.sin(self.phi))
+
+        self.f = 250.0
+        self.F = (0, -self.f)        
 
         # 各点の角度を表す変数を定義する
-#        self.angle_D = angle_phi
-#        self.angle_A = 0
-#        self.angle_B = 0
-#        self.angle_C = 0
-        self.phi = math.radians(angle_phi)
-
-#        self.angle_phi1 = 0
-        self.angle_phi2 = 0
+        self.angle_A = 180 - angle_phi
+        self.angle_B = angle_phi
+        self.angle_C = 180 - angle_phi
         self.angle_phi  = angle_phi
+
+        self.angle_phi1 = 0
+        self.angle_phi2 = 0
+
+        self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
         self.update_positions()
 
 
     def update_positions(self):
-        # 点Cを求める
-        self.C = (self.d * math.cos(self.phi), self.d * math.sin(self.phi))
-        h = math.sqrt((self.C[0] - self.a)**2 + self.C[1]**2)
+        # 角度δからΦを計算する
+        rad = self.F[1]/(self.b+self.e)
+#        print(rad)
+#        if rad >= -1.0 and rad <= 1.0:
+#            self.phi = math.acos(rad) - self.delta
+#            self.angle_phi = math.degrees(self.phi)
 
-        # 余弦定理で角Bを求める
-        cos_B = (self.b**2 + self.c**2 - h**2) / (2 * self.b * self.c)
-        # コサイン値が-1から1の範囲内に収まっているかを確認する
-        if cos_B < -1 or cos_B > 1:
-            # 範囲外の場合は、-1から1の範囲内に修正する
-            cos_B = max(-1, min(cos_B, 1))
+        # 各点の座標を計算する
+        self.B = (self.a + self.b * math.cos(self.phi), self.b * math.sin(self.phi))
+        self.C = (self.b * math.cos(self.phi), self.b * math.sin(self.phi))
+        self.E = (self.a + (self.b + self.e) * math.cos(self.phi), (self.b + self.e) * math.sin(self.phi))
 
-        B = math.acos(cos_B)
-        self.angle_B = math.degrees(B)
+        self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
-        cos_DCA = (self.d**2 + h**2 - self.a**2) / (2 * self.d * h)
-        # コサイン値が-1から1の範囲内に収まっているかを確認する
-        if cos_DCA < -1 or cos_DCA > 1:
-            # 範囲外の場合は、-1から1の範囲内に修正する
-            cos_DCA = max(-1, min(cos_DCA, 1))
-
-        DCA = math.acos(cos_DCA)
-        angle_DCA = math.degrees(DCA)
-
-        cos_ACB = (self.c**2 + h**2 - self.b**2) / (2 * self.c * h)
-        # コサイン値が-1から1の範囲内に収まっているかを確認する
-        if cos_ACB < -1 or cos_ACB > 1:
-            # 範囲外の場合は、-1から1の範囲内に修正する
-            cos_ACB = max(-1, min(cos_ACB, 1))
-
-        ACB = math.acos(cos_ACB)
-        angle_ACB = math.degrees(ACB)
-
-        self.angle_C = angle_DCA + angle_ACB
-
-        self.angle_A = 360 - self.angle_C - self.angle_B - self.angle_phi
-        
-        # 点Bを求める
-        theta = math.radians(180.0-self.angle_A)
-        x = self.a + self.b * math.cos(theta)
-        y = self.b * math.sin(theta)
-        
-        self.B = (x, y)
-
-        # Θ1の角度を求める
-        self.angle_phi1 = math.degrees(math.atan2(self.B[1], self.B[0]))
-        self.angle_phi2 = self.angle_phi - self.angle_phi1
-
-        # -------------------------------------
-        # 頂点Eを計算する
-        Ex = self.B[0] + math.cos(theta) * self.e
-        Ey = self.B[1] + math.sin(theta) * self.e
-
-        self.E = (Ex,Ey) 
-
-        a_chk = math.sqrt((self.A[0] - self.D[0])**2 + (self.A[1] - self.D[1])**2)
-        b_chk = math.sqrt((self.B[0] - self.A[0])**2 + (self.B[1] - self.A[1])**2)
-        c_chk = math.sqrt((self.C[0] - self.B[0])**2 + (self.C[1] - self.B[1])**2)
-        d_chk = math.sqrt((self.D[0] - self.C[0])**2 + (self.D[1] - self.C[1])**2)
-    #    print(a_chk, b_chk, c_chk, d_chk)
-    #    print(self.C[0], self.C[1])
 
     def set_phi(self, angle):
         # Φの角度は頂点Dの角度として保存する
@@ -126,7 +85,7 @@ class FourBarLinkage:
 
         self.update_positions()
 
-    def _convert_coordinate(self, pos: tuple, offset_x: int = 200, offset_y: int = 400) -> tuple:
+    def _convert_coordinate(self, pos: tuple, offset_x: int = 400, offset_y: int = 300) -> tuple:
         pos_int_x = int(pos[0]) + offset_x
         pos_int_y = -int(pos[1]) + offset_y
         pos_int = (pos_int_x, pos_int_y)
@@ -196,6 +155,8 @@ class FourBarLinkage:
 
     def draw_t(self, image: np.ndarray) -> None:
 
+        print(self.E_t)
+
         pos_A_int = self._convert_coordinate(self.A_t)
         pos_B_int = self._convert_coordinate(self.B_t)
         pos_C_int = self._convert_coordinate(self.C_t)
@@ -249,7 +210,12 @@ class FourBarLinkage:
 
         # 座標表示
         pos_int = (int(pos_E_int[0]), int(pos_E_int[1]) + 20)
-        cv2.putText(img = image, text = str(self.E), 
+        cv2.putText(img = image, text = str(self.E_t), 
+            org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+        pos_int = (int(pos_D_int[0]), int(pos_D_int[1]) + 20)
+        cv2.putText(img = image, text = str(self.D_t), 
             org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
@@ -260,17 +226,25 @@ class FourBarLinkage:
 
 
     # すべてのポイントの座標を変換する
-    def transform(self, H):
-        self.A_t, self.angle_A_t = self._transform_pin(pos = self.A, angle = self.angle_A, H=H)
-        self.B_t, self.angle_B_t = self._transform_pin(pos = self.B, angle = self.angle_B, H=H)
-        self.C_t, self.angle_C_t = self._transform_pin(pos = self.C, angle = self.angle_C, H=H)
-        self.D_t, self.angle_D_t = self._transform_pin(pos = self.D, angle = self.phi, H=H)
-        self.E_t = self._transform_point(pos = self.E, H=H)
+    def transform(self):
 
+        t = Transform2D(delta_angle= angle_delta)
+        H = t.matrix()
+
+        self.angle_A_t = self._transform_angle(angle = self.angle_A, H=H)
+        self.angle_B_t = self._transform_angle(angle = self.angle_B, H=H)
+        self.angle_C_t = self._transform_angle(angle = self.angle_C, H=H)
+        self.angle_D_t = self._transform_angle(angle = self.phi, H=H)
+        #self.angle_E_t = self._transform_angle(angle = self.angle_E, H=H)
+
+        self.A_t = self._transform_point(pos = self.A, H=H)
+        self.B_t = self._transform_point(pos = self.B, H=H)
+        self.C_t = self._transform_point(pos = self.C, H=H)
+        self.D_t = self._transform_point(pos = self.D, H=H)
+        self.E_t = self._transform_point(pos = self.E, H=H)
+        
         self.angle_phi1_t = self._transform_angle(angle = self.angle_phi1, H=H)
         self.angle_phi2_t = self._transform_angle(angle = self.angle_phi2, H=H)
-
-        #print(self.angle_A_t, self.angle_B_t, self.angle_C_t, self.angle_D_t)
 
     # ポイントの座標を変換する
     def _transform_pin(self, pos: Tuple[float, float], angle: float, H: np.ndarray) -> \
@@ -366,7 +340,7 @@ if __name__ == '__main__':
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
 #    four_bar_linkage = FourBarLinkage(a=300, b=80, c=300, d=80, e=150, angle_phi=60)
-    four_bar_linkage = FourBarLinkage(a=80, b=120, c=80, d=120, e=80, angle_phi=60)
+    four_bar_linkage = FourBarLinkage(a=80, b=120, e=80, angle_phi=60, angle_delta=0)
     four_bar_linkage.update_positions()
     # ----------------------------
 
@@ -386,8 +360,6 @@ if __name__ == '__main__':
     # 親座標の角度と平行移動
     angle_delta = -30
     four_bar_linkage.set_delta(angle_delta)
-    t = Transform2D(x = 200, y = 200, delta_angle= angle_delta)
-    H = t.matrix()
 
     cv2.namedWindow('panel')
     cv2.createTrackbar('deg', 'panel', 90, 360, lambda x: None)
@@ -415,12 +387,13 @@ if __name__ == '__main__':
 
         four_bar_linkage.set_phi(angle)
         four_bar_linkage.set_delta(angle=angle_delta)
-        t.set_data(x = 200, y = 200, delta_angle= angle_delta)
-        H = t.matrix()
+
+        # 角度deltaに応じて、degを変化させる
+#        four_bar_linkage.culc_phi(angle_delta)
+
         four_bar_linkage.update_positions()
-        four_bar_linkage.transform(H)
+        four_bar_linkage.transform()
         four_bar_linkage.draw_t(image=img)
-        # four_bar_linkage.draw(image = img)
 
         cv2.imshow('link test', img)
 
