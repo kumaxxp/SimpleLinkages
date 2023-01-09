@@ -28,15 +28,23 @@ class FourBarLinkage:
         self.c = a
         self.d = b
         self.e = e
+
+        self.angle_phi = angle_phi
+        self.angle_delta = angle_delta
         self.phi = math.radians(angle_phi)
         self.delta = math.radians(angle_delta)
+        self.phi_delta = math.radians(angle_phi + angle_delta)
 
         # 各点の座標を表す変数を定義する
         self.D = (0, 0)
-        self.A = (a, 0)
-        self.B = (a + b * math.cos(self.phi), b * math.sin(self.phi))
-        self.C = (b * math.cos(self.phi), b * math.sin(self.phi))
-        self.E = (a + (b + e) * math.cos(self.phi), (b + e) * math.sin(self.phi))
+        self.A = (a * math.cos(self.delta), a * math.sin(self.delta))
+        self.B = (a * math.cos(self.delta) + b * math.cos(self.phi_delta), 
+                a * math.sin(self.delta) + b * math.sin(self.phi_delta))
+        self.C = (b * math.cos(self.phi) * math.cos(self.delta) - b * math.sin(self.phi) * math.sin(self.delta),
+                b * math.cos(self.phi) * math.sin(self.delta) + b * math.sin(self.phi) * math.cos(self.delta))
+
+        self.E = (a * math.cos(self.delta) + (b + e) * math.cos(self.phi_delta),
+                a * math.sin(self.delta) + (b + e) * math.sin(self.phi_delta))
 
         self.f = 250.0
         self.F = (0, -self.f)        
@@ -56,17 +64,20 @@ class FourBarLinkage:
 
 
     def update_positions(self):
-        # 角度δからΦを計算する
-        rad = self.F[1]/(self.b+self.e)
-#        print(rad)
-#        if rad >= -1.0 and rad <= 1.0:
-#            self.phi = math.acos(rad) - self.delta
-#            self.angle_phi = math.degrees(self.phi)
 
         # 各点の座標を計算する
-        self.B = (self.a + self.b * math.cos(self.phi), self.b * math.sin(self.phi))
-        self.C = (self.b * math.cos(self.phi), self.b * math.sin(self.phi))
-        self.E = (self.a + (self.b + self.e) * math.cos(self.phi), (self.b + self.e) * math.sin(self.phi))
+        self.phi_delta = math.radians(self.angle_phi + self.angle_delta)
+
+        # 各点の座標を表す変数を定義する
+        self.D = (0, 0)
+        self.A = (self.a * math.cos(self.delta), self.a * math.sin(self.delta))
+        self.B = (self.a * math.cos(self.delta) + self.b * math.cos(self.phi_delta), 
+                self.a * math.sin(self.delta) + self.b * math.sin(self.phi_delta))
+        self.C = (self.b * math.cos(self.phi) * math.cos(self.delta) - self.b * math.sin(self.phi) * math.sin(self.delta),
+                self.b * math.cos(self.phi) * math.sin(self.delta) + self.b * math.sin(self.phi) * math.cos(self.delta))
+
+        self.E = (self.a * math.cos(self.delta) + (self.b + self.e) * math.cos(self.phi_delta),
+                self.a * math.sin(self.delta) + (self.b + self.e) * math.sin(self.phi_delta))
 
         self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
@@ -155,13 +166,17 @@ class FourBarLinkage:
 
     def draw_t(self, image: np.ndarray) -> None:
 
-        print(self.E_t)
+        #pos_A_int = self._convert_coordinate(self.A_t)
+        #pos_B_int = self._convert_coordinate(self.B_t)
+        #pos_C_int = self._convert_coordinate(self.C_t)
+        #pos_D_int = self._convert_coordinate(self.D_t)
+        #pos_E_int = self._convert_coordinate(self.E_t)
 
-        pos_A_int = self._convert_coordinate(self.A_t)
-        pos_B_int = self._convert_coordinate(self.B_t)
-        pos_C_int = self._convert_coordinate(self.C_t)
-        pos_D_int = self._convert_coordinate(self.D_t)
-        pos_E_int = self._convert_coordinate(self.E_t)
+        pos_A_int = self._convert_coordinate(self.A)
+        pos_B_int = self._convert_coordinate(self.B)
+        pos_C_int = self._convert_coordinate(self.C)
+        pos_D_int = self._convert_coordinate(self.D)
+        pos_E_int = self._convert_coordinate(self.E)
 
         # linkを描画する
         cv2.line(image, pt1=pos_A_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -210,12 +225,12 @@ class FourBarLinkage:
 
         # 座標表示
         pos_int = (int(pos_E_int[0]), int(pos_E_int[1]) + 20)
-        cv2.putText(img = image, text = str(self.E_t), 
+        cv2.putText(img = image, text = str(self.E), 
             org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
         pos_int = (int(pos_D_int[0]), int(pos_D_int[1]) + 20)
-        cv2.putText(img = image, text = str(self.D_t), 
+        cv2.putText(img = image, text = str(self.D), 
             org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
@@ -392,7 +407,7 @@ if __name__ == '__main__':
 #        four_bar_linkage.culc_phi(angle_delta)
 
         four_bar_linkage.update_positions()
-        four_bar_linkage.transform()
+        # four_bar_linkage.transform()
         four_bar_linkage.draw_t(image=img)
 
         cv2.imshow('link test', img)
