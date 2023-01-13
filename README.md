@@ -38,9 +38,11 @@ Simple Linkages for my robots
 Python 3.8.10
 OpenCV 4.5.4
 
+## minicondaにsympyをインストールする
+conda install sympy
+
 ```
 
 ## 実装しながら作る
 
-
-
+$\left[ \left\{ x : - \sqrt{y}\right\}, \  \left\{ x : \sqrt{y}\right\}\right]$
