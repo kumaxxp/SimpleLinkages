@@ -45,4 +45,4 @@ conda install sympy
 
 ## 実装しながら作る
 
-$\left[ \left\{ x : - \sqrt{y}\right\}, \  \left\{ x : \sqrt{y}\right\}\right]$
+$$\left[ \left\{ x : - \sqrt{y}\right\}, \  \left\{ x : \sqrt{y}\right\}\right]$$

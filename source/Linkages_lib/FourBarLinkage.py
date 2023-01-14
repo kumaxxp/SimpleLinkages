@@ -45,15 +45,18 @@ class FourBarLinkage:
         self.d = b
         self.e = e
 
-        self.g = a
+        self.f = math.sqrt(2* ((RECT_LEN * 2) ** 2))
 
         self.t = 0
         self.pos_ellipse = (100, 100)
 
         self.angle_phi = angle_phi
         self.angle_delta = angle_delta
+        self.angle_gamma = self.angle_phi + self.angle_delta
+
         self.phi = math.radians(angle_phi)
         self.delta = math.radians(angle_delta)
+        self.gamma = math.radians(self.angle_gamma)
         self.phi_delta = math.radians(angle_phi + angle_delta)
 
         # 各点の座標を表す変数を定義する
@@ -67,9 +70,10 @@ class FourBarLinkage:
         self.E = (a * math.cos(self.delta) + (b + e) * math.cos(self.phi_delta),
                 a * math.sin(self.delta) + (b + e) * math.sin(self.phi_delta))
 
-        self.F = (self.C[0] + self.g, self.C[1])
-        self.G = (self.D[0] + self.g, self.D[1])
 
+        #self.F = (self.D[0] + self.f * math.cos(self.delta), self.D[1] + self.f * math.sin(self.delta))
+        self.F = (self.D[0] + RECT_LEN*2, self.D[1] + RECT_LEN*2)
+        self.G = (self.F[0] + self.b * math.cos(self.gamma), self.F[1] + self.b * math.sin(self.gamma))
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -89,6 +93,8 @@ class FourBarLinkage:
 
         # 各点の座標を計算する
         self.phi_delta = math.radians(self.angle_phi + self.angle_delta)
+        self.angle_gamma = self.angle_phi + self.angle_delta
+        self.gamma = math.radians(self.angle_gamma)
 
         # 各点の座標を表す変数を定義する
         self.D = (0, 0)
@@ -103,8 +109,10 @@ class FourBarLinkage:
 
         self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
-        self.F = (self.C[0] + self.g, self.C[1])
-        self.G = (self.D[0] + self.g, self.D[1])
+        in_delta = math.radians(self.angle_delta - 180)
+
+#        self.F = (self.D[0] + self.f * math.cos(in_delta), self.D[1] + self.f * math.sin(in_delta))
+        self.G = (self.F[0] + self.b * math.cos(self.gamma), self.F[1] + self.b * math.sin(self.gamma))
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -166,7 +174,7 @@ class FourBarLinkage:
 
         self.update_positions()
 
-    def _convert_coordinate(self, pos: tuple, offset_x: int = 400, offset_y: int = 300) -> tuple:
+    def _convert_coordinate(self, pos: tuple, offset_x: int = 400, offset_y: int = 200) -> tuple:
         pos_int_x = int(pos[0]) + offset_x
         pos_int_y = -int(pos[1]) + offset_y
         pos_int = (pos_int_x, pos_int_y)
@@ -214,15 +222,15 @@ class FourBarLinkage:
             angle=0, startAngle=angle_delta_st, endAngle=angle_delta_ed, color=CENTER_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
         # モーターを互い違いに2配置するイメージ
-        pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN*3)
-        pos2 = (pos_D_int[0] + RECT_LEN, pos_D_int[1] +RECT_LEN)
-        cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
-
-        pos1 = (pos_D_int[0] + RECT_LEN, pos_D_int[1] -RECT_LEN*3)
+        pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN)
         pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] +RECT_LEN)
         cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
 
-        pos_motor = (pos_D_int[0] + RECT_LEN*2, pos_D_int[1])
+        pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN*3)
+        pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] -RECT_LEN)
+        cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
+
+        pos_motor = (pos_D_int[0] + RECT_LEN*2, pos_D_int[1] - RECT_LEN*2)
         cv2.circle(image, center=pos_motor, radius=PIN_RADIUS, color=CENTER_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         # linkを描画する
@@ -231,7 +239,7 @@ class FourBarLinkage:
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_C_int, pt2=pos_F_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_C_int, pt2=pos_G_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_F_int, pt2=pos_G_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 頂点Dを描画する。Φ/Φ1/Φ2を表示
@@ -252,6 +260,9 @@ class FourBarLinkage:
             angle=0, startAngle=angle_D_st, endAngle=angle_D_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
         cv2.circle(image, center=pos_E_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.circle(image, center=pos_G_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
 #        cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 #        cv2.ellipse(image, center=pos_F_int, axes=(PIN_RADIUS, PIN_RADIUS),
@@ -381,7 +392,7 @@ class FourBarLinkage:
         
         r = -math.pi * (1/1000)*t *1.5
         x = a * math.cos(r)
-        y = b * math.sin(r) - 250
+        y = b * math.sin(r) - 300
 
         return x,y
 
@@ -417,7 +428,7 @@ if __name__ == '__main__':
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
 #    four_bar_linkage = FourBarLinkage(a=300, b=80, c=300, d=80, e=150, angle_phi=60)
-    four_bar_linkage = FourBarLinkage(a=80, b=120, e=80, angle_phi=60, angle_delta=0)
+    four_bar_linkage = FourBarLinkage(a=100, b=160, e=100, angle_phi=60, angle_delta=0)
     four_bar_linkage.update_positions()
     # ----------------------------
 
@@ -484,7 +495,7 @@ if __name__ == '__main__':
         y_in = Ey - y_offset
 
         # ポイントEの座標からΦとδを割り出してリンクの座標を計算する
-        #four_bar_linkage.update_inverse_kinematics(x=x_in, y=y_in)
+    #    four_bar_linkage.update_inverse_kinematics(x=x_in, y=y_in)
         four_bar_linkage.update_inverse_kinematics(x=four_bar_linkage.pos_ellipse[0] , y=four_bar_linkage.pos_ellipse[1] )
 
         four_bar_linkage.update_positions()
