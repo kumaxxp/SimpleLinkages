@@ -47,6 +47,8 @@ class FourBarLinkage:
 
         self.f = math.sqrt(2* ((RECT_LEN * 2) ** 2))
 
+        self.g = 50
+
         self.t = 0
         self.pos_ellipse = (100, 100)
 
@@ -73,7 +75,8 @@ class FourBarLinkage:
 
         #self.F = (self.D[0] + self.f * math.cos(self.delta), self.D[1] + self.f * math.sin(self.delta))
         self.F = (self.D[0] + RECT_LEN*2, self.D[1] + RECT_LEN*2)
-        self.G = (self.F[0] + self.b * math.cos(self.gamma), self.F[1] + self.b * math.sin(self.gamma))
+        self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
+        self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -93,7 +96,7 @@ class FourBarLinkage:
 
         # 各点の座標を計算する
         self.phi_delta = math.radians(self.angle_phi + self.angle_delta)
-        self.angle_gamma = self.angle_phi + self.angle_delta
+        self.angle_gamma = self.angle_phi + self.angle_delta - 180
         self.gamma = math.radians(self.angle_gamma)
 
         # 各点の座標を表す変数を定義する
@@ -111,8 +114,8 @@ class FourBarLinkage:
 
         in_delta = math.radians(self.angle_delta - 180)
 
-#        self.F = (self.D[0] + self.f * math.cos(in_delta), self.D[1] + self.f * math.sin(in_delta))
-        self.G = (self.F[0] + self.b * math.cos(self.gamma), self.F[1] + self.b * math.sin(self.gamma))
+        self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
+        self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -205,6 +208,7 @@ class FourBarLinkage:
         pos_E_int = self._convert_coordinate(self.E)
         pos_F_int = self._convert_coordinate(self.F)
         pos_G_int = self._convert_coordinate(self.G)
+        pos_H_int = self._convert_coordinate(self.H)
 
         # cv2の座標系に回転角を変換する
         # 角度は±反転し、反時計回りで塗りつぶせるように、
@@ -239,8 +243,10 @@ class FourBarLinkage:
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_C_int, pt2=pos_G_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_F_int, pt2=pos_G_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_D_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_G_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_D_int, pt2=pos_F_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 頂点Dを描画する。Φ/Φ1/Φ2を表示
         cv2.circle(image, center=pos_A_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -489,7 +495,7 @@ if __name__ == '__main__':
         # ---------------------------------------------------------
 
         # モードの切替
-        mode = cv2.getTrackbarPos('Ex', 'panel')
+        mode = cv2.getTrackbarPos('mode', 'panel')
         # mode=0: 自動で逆運動で楕円に動く
         # mode=1: 手動で逆運動で操作
         # mode=2: 手動で角度Φ/角度δを調整
