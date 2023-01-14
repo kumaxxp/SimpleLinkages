@@ -15,8 +15,10 @@ from typing import List
 import math
 
 LINK_COLOR = (100, 100, 100)
-LINK_COLOR_G = (0, 0, 255)
+LINK_COLOR_R = (0, 0, 255)
 LINK_WIDTH = 2
+LINK_COLOR_B = (255, 0, 0)
+LINK_COLOR_G = (0, 255, 0)
 
 PIN_RADIUS = 30
 PIN_RADIUS_PHI = 20
@@ -43,6 +45,8 @@ class FourBarLinkage:
         self.d = b
         self.e = e
 
+        self.g = a
+
         self.t = 0
         self.pos_ellipse = (100, 100)
 
@@ -63,8 +67,9 @@ class FourBarLinkage:
         self.E = (a * math.cos(self.delta) + (b + e) * math.cos(self.phi_delta),
                 a * math.sin(self.delta) + (b + e) * math.sin(self.phi_delta))
 
-        self.f = 250.0
-        self.F = (0, -self.f)        
+        self.F = (self.C[0] + self.g, self.C[1])
+        self.G = (self.D[0] + self.g, self.D[1])
+
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -97,6 +102,9 @@ class FourBarLinkage:
                 self.a * math.sin(self.delta) + (self.b + self.e) * math.sin(self.phi_delta))
 
         self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
+
+        self.F = (self.C[0] + self.g, self.C[1])
+        self.G = (self.D[0] + self.g, self.D[1])
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -187,6 +195,8 @@ class FourBarLinkage:
         pos_C_int = self._convert_coordinate(self.C)
         pos_D_int = self._convert_coordinate(self.D)
         pos_E_int = self._convert_coordinate(self.E)
+        pos_F_int = self._convert_coordinate(self.F)
+        pos_G_int = self._convert_coordinate(self.G)
 
         # cv2の座標系に回転角を変換する
         # 角度は±反転し、反時計回りで塗りつぶせるように、
@@ -219,8 +229,10 @@ class FourBarLinkage:
         cv2.line(image, pt1=pos_A_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B_int, pt2=pos_C_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_C_int, pt2=pos_F_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_F_int, pt2=pos_G_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 頂点Dを描画する。Φ/Φ1/Φ2を表示
         cv2.circle(image, center=pos_A_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -241,8 +253,16 @@ class FourBarLinkage:
 
         cv2.circle(image, center=pos_E_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
+#        cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+#        cv2.ellipse(image, center=pos_F_int, axes=(PIN_RADIUS, PIN_RADIUS),
+#            angle=0, startAngle=angle_F_st, endAngle=angle_F_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+
+#        cv2.circle(image, center=pos_G_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+#        cv2.ellipse(image, center=pos_G_int, axes=(PIN_RADIUS, PIN_RADIUS),
+#            angle=0, startAngle=angle_G_st, endAngle=angle_G_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+
         # 対角線
-        cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # テキスト
         cv2.putText(img = image, text = 'A', org = pos_A_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
