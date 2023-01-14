@@ -458,7 +458,8 @@ if __name__ == '__main__':
     four_bar_linkage.set_delta(angle_delta)
 
     cv2.namedWindow('panel')
-    cv2.createTrackbar('deg', 'panel', 90, 360, lambda x: None)
+    cv2.createTrackbar('mode', 'panel', 0, 3, lambda x: None)
+    cv2.createTrackbar('phi', 'panel', 90, 360, lambda x: None)
     cv2.createTrackbar('delta', 'panel', 210, 360, lambda x: None)
     cv2.createTrackbar('Ex', 'panel', 200, 400, lambda x: None)
     cv2.createTrackbar('Ey', 'panel', 30, 100, lambda x: None)
@@ -487,6 +488,12 @@ if __name__ == '__main__':
             cv2.line(img, (0, y), (width, y), axis_color, 1)    
         # ---------------------------------------------------------
 
+        # モードの切替
+        mode = cv2.getTrackbarPos('Ex', 'panel')
+        # mode=0: 自動で逆運動で楕円に動く
+        # mode=1: 手動で逆運動で操作
+        # mode=2: 手動で角度Φ/角度δを調整
+        #
 
         # 角度変更
         x_offset = cv2.getTrackbarPos('Ex', 'panel')
@@ -494,9 +501,17 @@ if __name__ == '__main__':
         x_in = Ex + x_offset
         y_in = Ey - y_offset
 
-        # ポイントEの座標からΦとδを割り出してリンクの座標を計算する
-    #    four_bar_linkage.update_inverse_kinematics(x=x_in, y=y_in)
-        four_bar_linkage.update_inverse_kinematics(x=four_bar_linkage.pos_ellipse[0] , y=four_bar_linkage.pos_ellipse[1] )
+        if mode == 0:   # 自動で逆運動で楕円に動く
+            four_bar_linkage.update_inverse_kinematics(x=four_bar_linkage.pos_ellipse[0] , y=four_bar_linkage.pos_ellipse[1] )
+
+        elif mode == 1: # 手動で逆運動で操作
+            four_bar_linkage.update_inverse_kinematics(x=x_in, y=y_in)
+
+        elif mode == 2: # 手動で角度Φ/角度δを操作
+            phi = cv2.getTrackbarPos('phi', 'panel')
+            delta = cv2.getTrackbarPos('delta', 'panel')
+            four_bar_linkage.set_phi(phi)
+            four_bar_linkage.set_delta(delta)
 
         four_bar_linkage.update_positions()
         four_bar_linkage.draw(image=img)
