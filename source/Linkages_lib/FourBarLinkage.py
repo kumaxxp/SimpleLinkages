@@ -352,7 +352,8 @@ def create_mp4(in_dir, out_filename, fps=24):
     clip = ImageSequenceClip(path_list, fps=fps) # 画像を読み込んで動画を生成
     clip.write_videofile(out_filename, codec='libx264') # 動画をmp4形式で保存
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def main():
 
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する
@@ -381,10 +382,6 @@ if __name__ == '__main__':
     # 方眼のステップ（ピクセル）
     grid_step = 50
 
-    # 親座標の角度と平行移動
-    angle_delta = -30
-    four_bar_linkage.set_delta(angle_delta)
-
     cv2.namedWindow('panel')
     cv2.createTrackbar('mode', 'panel', 0, 3, lambda x: None)
     cv2.createTrackbar('phi', 'panel', 90, 360, lambda x: None)
@@ -395,8 +392,6 @@ if __name__ == '__main__':
 
     Ex = -200
     Ey = -200
-    angle = 0
-    angle_delta = 0
 
     i : int = 0
 
