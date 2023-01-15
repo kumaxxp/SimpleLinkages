@@ -5,10 +5,10 @@ Simple Linkages for my robots
 4節リンク/リンク/ピン の3つのクラスを作成して、順々に進化させていきます。
 
 **設計概要**
-<img src = "./doc/4節リンクのプログラムを検討3.drawio.png" width = 600>
+<img src = "./doc/4節リンクのプログラムを検討8.drawio.png" width = 600>
 
-**現在の実装のイメージ**
-![picture 5](images/1672715555230.png)  
+**現在の表示**
+<img src = "./doc/2023-01-15-07-24-36.png" width = 600>
 
 ---
 
@@ -37,12 +37,13 @@ Simple Linkages for my robots
 
 Python 3.8.10
 OpenCV 4.5.4
+moviepy 1.0.3
+
+pip install moviepy 
 
 ## minicondaにsympyをインストールする
 conda install sympy
 
 ```
 
-## 実装しながら作る
 
-$$\left[ \left\{ x : - \sqrt{y}\right\}, \  \left\{ x : \sqrt{y}\right\}\right]$$

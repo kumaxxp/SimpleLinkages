@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import cv2
 import os
 import shutil
@@ -7,6 +10,7 @@ from moviepy.editor import ImageSequenceClip
 from PIL import Image
 import glob
 import numpy as np
+from matplotlib import pyplot as plt
 
 import math
 from typing import Tuple
@@ -32,6 +36,9 @@ PIN_WIDTH = 1
 CENTER_RADIUS = 50
 CENTER_COLOR = (100, 100, 100)
 CENTER_COLOR_ARC = (240, 220, 220)
+
+G_RADIUS = 15
+G_COLOR = (0, 0, 200)
 
 RECT_LEN = 40
 RECT_COLOR = (50, 50, 50)
@@ -112,10 +119,10 @@ class FourBarLinkage:
 
         self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
-        in_delta = math.radians(self.angle_delta - 180)
-
         self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
+
+        self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -209,11 +216,13 @@ class FourBarLinkage:
         pos_F_int = self._convert_coordinate(self.F)
         pos_G_int = self._convert_coordinate(self.G)
         pos_H_int = self._convert_coordinate(self.H)
+        pos_I_int = self._convert_coordinate(self.I)
 
         # cv2の座標系に回転角を変換する
         # 角度は±反転し、反時計回りで塗りつぶせるように、
         # 開始角度を大きな数値になるように調整する
         angle_delta_st, angle_delta_ed = self._convert_angle(0, self.angle_delta)
+        angle_gamma_st, angle_gamma_ed = self._convert_angle(0, self.angle_gamma)
 
         angle_A_st, angle_A_ed = self._convert_angle(self.angle_A_st, self.angle_A_ed)
         angle_B_st, angle_B_ed = self._convert_angle(self.angle_B_st, self.angle_B_ed)
@@ -224,6 +233,8 @@ class FourBarLinkage:
         cv2.circle(image, center=pos_D_int, radius=CENTER_RADIUS, color=CENTER_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.ellipse(image, center=pos_D_int, axes=(CENTER_RADIUS, CENTER_RADIUS),
             angle=0, startAngle=angle_delta_st, endAngle=angle_delta_ed, color=CENTER_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+        cv2.ellipse(image, center=pos_F_int, axes=(CENTER_RADIUS, CENTER_RADIUS),
+            angle=0, startAngle=angle_gamma_st, endAngle=angle_gamma_ed, color=CENTER_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
         # モーターを互い違いに2配置するイメージ
         pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN)
@@ -269,17 +280,13 @@ class FourBarLinkage:
 
         cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_G_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-
-#        cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-#        cv2.ellipse(image, center=pos_F_int, axes=(PIN_RADIUS, PIN_RADIUS),
-#            angle=0, startAngle=angle_F_st, endAngle=angle_F_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
-
-#        cv2.circle(image, center=pos_G_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-#        cv2.ellipse(image, center=pos_G_int, axes=(PIN_RADIUS, PIN_RADIUS),
-#            angle=0, startAngle=angle_G_st, endAngle=angle_G_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
+        cv2.circle(image, center=pos_I_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 対角線
         cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        # 重心からエンドエフェクトまで
+        cv2.line(image, pt1=pos_I_int, pt2=pos_E_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         # テキスト
         cv2.putText(img = image, text = 'A', org = pos_A_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
@@ -291,6 +298,12 @@ class FourBarLinkage:
         cv2.putText(img = image, text = 'D', org = pos_D_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'E', org = pos_E_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'F', org = pos_F_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'G', org = pos_G_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'H', org = pos_H_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
         pos_int = (int(pos_A_int[0]), int(pos_A_int[1]) + 20)
@@ -316,84 +329,15 @@ class FourBarLinkage:
             angle=0, startAngle=0, endAngle=360, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA)
 
         
-        self.pos_ellipse = self.ellipse_xy(self.t)
         pos_ellipse_int = self._convert_coordinate(self.pos_ellipse)
-        self.t += 1
-
         cv2.circle(image, center=pos_ellipse_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
-
-    # ポイントの座標を変換する
-    def _transform_pin(self, pos: Tuple[float, float], angle: float, H: np.ndarray) -> \
-        Tuple[Tuple[float, float], float]:
-
-        # 元の座標を表す行列を作成
-        point = np.array([[pos[0]], [pos[1]], [1]])
-        
-        # 元の座標を変換行列 H の座標系に変換
-        transformed_point = H @ point
-        
-        # 変換後の座標を取得
-        x_t = transformed_point[0, 0]
-        y_t = transformed_point[1, 0]
-
-        radian = math.radians(angle)
-        
-        # 元の回転角度を表す行列を作成
-        rotation = np.array([[np.cos(radian), -np.sin(radian), 0],
-                            [np.sin(radian), np.cos(radian), 0],
-                            [0, 0, 1]])
-        
-        # 元の回転角度を変換行列 H の座標系に変換
-        transformed_rotation = H @ rotation @ np.linalg.inv(H)
-        
-        # 変換後の回転角度を取得
-        theta = np.arctan2(transformed_rotation[1, 0], transformed_rotation[0, 0])
-
-        pos: tuple = (x_t, y_t)
-        theta_degree = math.degrees(theta)
-
-        return pos, theta_degree
-
-    # ポイントの座標を変換する
-    def _transform_point(self, pos: Tuple[float, float], H: np.ndarray) -> Tuple[float, float]:
-
-        # 元の座標を表す行列を作成
-        point = np.array([[pos[0]], [pos[1]], [1]])
-        
-        # 元の座標を変換行列 H の座標系に変換
-        transformed_point = H @ point
-        
-        # 変換後の座標を取得
-        x_t = transformed_point[0, 0]
-        y_t = transformed_point[1, 0]
-                
-        # 変換後の回転角度を取得
-        pos: Tuple = (x_t, y_t)
-
-        return pos
-
-    # ポイントの座標を変換する
-    def _transform_angle(self, angle: float, H: np.ndarray) -> float:
-
-        radian = math.radians(angle)
-
-        # 元の回転角度を表す行列を作成
-        rotation = np.array([[np.cos(radian), -np.sin(radian), 0],
-                            [np.sin(radian), np.cos(radian), 0],
-                            [0, 0, 1]])
-        
-        # 元の回転角度を変換行列 H の座標系に変換
-        transformed_rotation = H @ rotation @ np.linalg.inv(H)
-        
-        # 変換後の回転角度を取得
-        theta = np.arctan2(transformed_rotation[1, 0], transformed_rotation[0, 0])
-        theta_degree = math.degrees(theta)
-
-        return theta_degree
+    def culc_ellipse(self):
+        self.pos_ellipse = self.ellipse_xy(self.t)
+        self.t += 10
 
     def ellipse_xy(self, t:float) -> Tuple[float, float]:
-        a = 100
+        a = 150
         b = 20
         
         r = -math.pi * (1/1000)*t *1.5
@@ -403,31 +347,10 @@ class FourBarLinkage:
         return x,y
 
 
-
-class Transform2D:
-    def __init__(self, x=0, y=0, delta_angle=0):
-        self.x = x
-        self.y = y
-        self.delta_angle = delta_angle
-        self.delta = math.radians(delta_angle)
-
-    def set_data(self, x=0, y=0, delta_angle=0):
-        self.x = x
-        self.y = y
-        self.delta_angle = delta_angle
-        self.delta = math.radians(delta_angle)
-    
-    def matrix(self):
-        return np.array([[np.cos(self.delta), -np.sin(self.delta), self.x],
-                         [np.sin(self.delta), np.cos(self.delta), self.y],
-                         [0, 0, 1]])
-
-
 def create_mp4(in_dir, out_filename, fps=24):
     path_list = sorted(glob.glob(os.path.join(*[in_dir, '*']))) # ファイルパスをソートしてリストする
     clip = ImageSequenceClip(path_list, fps=fps) # 画像を読み込んで動画を生成
     clip.write_videofile(out_filename, codec='libx264') # 動画をmp4形式で保存
-
 
 if __name__ == '__main__':
 
@@ -449,7 +372,6 @@ if __name__ == '__main__':
     else:
         os.mkdir(dir)
 
-
     # 画像を生成する
     img = np.zeros((height, width, 3), np.uint8)
 
@@ -467,6 +389,7 @@ if __name__ == '__main__':
     cv2.createTrackbar('mode', 'panel', 0, 3, lambda x: None)
     cv2.createTrackbar('phi', 'panel', 90, 360, lambda x: None)
     cv2.createTrackbar('delta', 'panel', 210, 360, lambda x: None)
+    cv2.createTrackbar('gamma', 'panel', 120, 360, lambda x: None)
     cv2.createTrackbar('Ex', 'panel', 200, 400, lambda x: None)
     cv2.createTrackbar('Ey', 'panel', 30, 100, lambda x: None)
 
@@ -476,6 +399,37 @@ if __name__ == '__main__':
     angle_delta = 0
 
     i : int = 0
+
+    # グラフの準備 ----------------
+    plt.ion()
+
+    figure, (ax1,ax2,ax3) = plt.subplots(nrows = 3, figsize=(8,6))
+    line1, = ax1.plot((-100,0), (-360,360), label="$\gamma$")
+    line2, = ax2.plot((-100,0), (-360,360), label="$\phi$")
+    line3, = ax3.plot((-100,0), (-360,360), label="$\delta$")
+
+    line1_1, = ax1.plot((-100,0), (-360,360), label="$vel- \gamma$")
+
+    plt.xlabel("X",fontsize=18)
+    plt.ylabel("angle",fontsize=18) 
+
+    hans, labs = ax1.get_legend_handles_labels()
+    ax1.legend(handles=hans, labels=labs)
+
+    hans, labs = ax2.get_legend_handles_labels()
+    ax2.legend(handles=hans, labels=labs)
+    
+    hans, labs = ax3.get_legend_handles_labels()
+    ax3.legend(handles=hans, labels=labs)
+
+    ar_data_y1 = np.zeros(100)
+    ar_data_y2 = np.zeros(100)
+    ar_data_y3 = np.zeros(100)
+
+    ar_data_y1_1 = np.zeros(100)
+    ar_data_x = np.array(range(-100,0))
+
+    # -----------------------------
 
     bRec : bool = False
 
@@ -494,21 +448,17 @@ if __name__ == '__main__':
             cv2.line(img, (0, y), (width, y), axis_color, 1)    
         # ---------------------------------------------------------
 
-        # モードの切替
-        mode = cv2.getTrackbarPos('mode', 'panel')
-        # mode=0: 自動で逆運動で楕円に動く
-        # mode=1: 手動で逆運動で操作
-        # mode=2: 手動で角度Φ/角度δを調整
-        #
-
         # 角度変更
         x_offset = cv2.getTrackbarPos('Ex', 'panel')
         y_offset = cv2.getTrackbarPos('Ey', 'panel')
         x_in = Ex + x_offset
         y_in = Ey - y_offset
 
+        # モードの切替
+        mode = cv2.getTrackbarPos('mode', 'panel')
         if mode == 0:   # 自動で逆運動で楕円に動く
             four_bar_linkage.update_inverse_kinematics(x=four_bar_linkage.pos_ellipse[0] , y=four_bar_linkage.pos_ellipse[1] )
+            four_bar_linkage.culc_ellipse()
 
         elif mode == 1: # 手動で逆運動で操作
             four_bar_linkage.update_inverse_kinematics(x=x_in, y=y_in)
@@ -516,6 +466,13 @@ if __name__ == '__main__':
         elif mode == 2: # 手動で角度Φ/角度δを操作
             phi = cv2.getTrackbarPos('phi', 'panel')
             delta = cv2.getTrackbarPos('delta', 'panel')
+            four_bar_linkage.set_phi(phi)
+            four_bar_linkage.set_delta(delta)
+
+        elif mode == 3: # 手動で角度γ/角度δを操作（駆動軸で位置決定する）
+            gamma = cv2.getTrackbarPos('gamma', 'panel')
+            delta = cv2.getTrackbarPos('delta', 'panel')
+            phi = gamma - (delta-180)
             four_bar_linkage.set_phi(phi)
             four_bar_linkage.set_delta(delta)
 
@@ -527,14 +484,51 @@ if __name__ == '__main__':
         if cv2.waitKey(1) == ord('q'):
             break
 
+        # データをグラフ表示 ---------------------------------------
+        ar_data_y1 = np.roll(ar_data_y1, -1)
+        ar_data_y1[-1] = four_bar_linkage.angle_gamma
+
+        ar_data_y2 = np.roll(ar_data_y2, -1)
+        ar_data_y2[-1] = four_bar_linkage.angle_phi
+
+        ar_data_y3 = np.roll(ar_data_y3, -1)
+        ar_data_y3[-1] = four_bar_linkage.angle_delta
+
+        # 角速度
+        vel_1 = ar_data_y1[-2] - ar_data_y1[-1]
+        ar_data_y1_1 = np.roll(ar_data_y1_1, -1)
+        ar_data_y1_1[-1] = vel_1*100
+
+        line1.set_xdata(ar_data_x)
+        line1.set_ydata(ar_data_y1)
+        line1_1.set_xdata(ar_data_x)
+        line1_1.set_ydata(ar_data_y1_1)
+
+        line2.set_xdata(ar_data_x)
+        line2.set_ydata(ar_data_y2)
+
+        line3.set_xdata(ar_data_x)
+        line3.set_ydata(ar_data_y3)
+
+    #    figure.canvas.draw()
+    #    figure.canvas.flush_events()
+
+        # ---------------------------------------------------------
+
         # 画像保存パスを準備
         # 画像を保存
         if bRec == True:
-            path = os.path.join(*[dir, str("{:05}".format(i)) + '.jpg'])
-            cv2.imwrite(path, img)
+            if img.size != 0:
+                path = os.path.join(*[dir, str("{:05}".format(i)) + '.png'])
+                scale = 0.5
+                img_tmp = img.copy()
+                re_width  :int = int(img_tmp.shape[1]*scale)
+                re_height :int = int(img_tmp.shape[0]*scale)
+                img2 = cv2.resize(img_tmp, (re_width, re_height))
+
+                cv2.imwrite(path, img2)
 
         i += 1
-
 
     # 動画を作成する
     if bRec == True:
