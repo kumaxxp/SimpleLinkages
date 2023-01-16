@@ -46,15 +46,14 @@ RECT_COLOR = (50, 50, 50)
 # 四節リンクを表すクラス
 class FourBarLinkage:
     def __init__(self, a, b, e, angle_phi, angle_delta):
-        self.a = a
-        self.b = b
-        self.c = a
-        self.d = b
-        self.e = e
+        self.a : float = a
+        self.b : float = b
+        self.c : float = a
+        self.d : float = b
+        self.e : float = e
 
-        self.f = math.sqrt(2* ((RECT_LEN * 2) ** 2))
-
-        self.g = 50
+        self.f : float = math.sqrt(2* ((RECT_LEN * 2) ** 2))    # 113.13
+        self.g : float = 50
 
         self.t = 0
         self.pos_ellipse = (100, 100)
@@ -346,14 +345,12 @@ class FourBarLinkage:
 
         return x,y
 
-
 def create_mp4(in_dir, out_filename, fps=24):
     path_list = sorted(glob.glob(os.path.join(*[in_dir, '*']))) # ファイルパスをソートしてリストする
     clip = ImageSequenceClip(path_list, fps=fps) # 画像を読み込んで動画を生成
     clip.write_videofile(out_filename, codec='libx264') # 動画をmp4形式で保存
 
-#if __name__ == '__main__':
-def main():
+if __name__ == '__main__':
 
     # ----------------------------
     # 四節リンクを生成し、各点の座標を表示する

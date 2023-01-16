@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-sys.path.append('/mnt/c/project/SimpleLinkages/source/Linkages_lib')
-
 import Linkages_lib.FourBarLinkage as FourBarLinkage
 import os
 import cv2
@@ -15,9 +12,11 @@ from matplotlib import pyplot as plt
 from moviepy.editor import ImageSequenceClip
 
 def link_machine():
-    print(sys.path)
     print("start four_bar_links")
 
+    # リンクの長さ比
+    # a : b : e = 100 : 160 : 100
+    # f : g = 113.13 : 50
     four_bar = FourBarLinkage(a=100, b=160, e=100, angle_phi=60, angle_delta=0)
     four_bar.update_positions()
 
@@ -53,37 +52,6 @@ def link_machine():
     Ey = -200
 
     i : int = 0
-
-    # グラフの準備 ----------------
-    plt.ion()
-
-    figure, (ax1,ax2,ax3) = plt.subplots(nrows = 3, figsize=(8,6))
-    line1, = ax1.plot((-100,0), (-360,360), label="$\gamma$")
-    line2, = ax2.plot((-100,0), (-360,360), label="$\phi$")
-    line3, = ax3.plot((-100,0), (-360,360), label="$\delta$")
-
-    line1_1, = ax1.plot((-100,0), (-360,360), label="$vel- \gamma$")
-
-    plt.xlabel("X",fontsize=18)
-    plt.ylabel("angle",fontsize=18) 
-
-    hans, labs = ax1.get_legend_handles_labels()
-    ax1.legend(handles=hans, labels=labs)
-
-    hans, labs = ax2.get_legend_handles_labels()
-    ax2.legend(handles=hans, labels=labs)
-    
-    hans, labs = ax3.get_legend_handles_labels()
-    ax3.legend(handles=hans, labels=labs)
-
-    ar_data_y1 = np.zeros(100)
-    ar_data_y2 = np.zeros(100)
-    ar_data_y3 = np.zeros(100)
-
-    ar_data_y1_1 = np.zeros(100)
-    ar_data_x = np.array(range(-100,0))
-
-    # -----------------------------
 
     bRec : bool = False
 
@@ -138,37 +106,6 @@ def link_machine():
         if cv2.waitKey(1) == ord('q'):
             break
 
-        # データをグラフ表示 ---------------------------------------
-        ar_data_y1 = np.roll(ar_data_y1, -1)
-        ar_data_y1[-1] = four_bar.angle_gamma
-
-        ar_data_y2 = np.roll(ar_data_y2, -1)
-        ar_data_y2[-1] = four_bar.angle_phi
-
-        ar_data_y3 = np.roll(ar_data_y3, -1)
-        ar_data_y3[-1] = four_bar.angle_delta
-
-        # 角速度
-        vel_1 = ar_data_y1[-2] - ar_data_y1[-1]
-        ar_data_y1_1 = np.roll(ar_data_y1_1, -1)
-        ar_data_y1_1[-1] = vel_1*100
-
-        line1.set_xdata(ar_data_x)
-        line1.set_ydata(ar_data_y1)
-        line1_1.set_xdata(ar_data_x)
-        line1_1.set_ydata(ar_data_y1_1)
-
-        line2.set_xdata(ar_data_x)
-        line2.set_ydata(ar_data_y2)
-
-        line3.set_xdata(ar_data_x)
-        line3.set_ydata(ar_data_y3)
-
-    #    figure.canvas.draw()
-    #    figure.canvas.flush_events()
-
-        # ---------------------------------------------------------
-
         # 画像保存パスを準備
         # 画像を保存
         if bRec == True:
@@ -192,5 +129,5 @@ def link_machine():
     cv2.destroyAllWindows()
 
 
-#if __name__ == '__main__':
-#    link_machine()
+if __name__ == '__main__':
+    link_machine()
