@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt # グラフ表示のため
 from mpl_toolkits.mplot3d import Axes3D # ３Dグラフ作成のため
 import mpl_toolkits.mplot3d.art3d as art3d
 
+import Linkages_lib.FourBarLinkage as FourBarLinkage
+
 # params
 frame = 1500  # プロットするフレーム数
 sleepTime = 0.05  # １フレーム表示する時間[s]
@@ -63,13 +65,20 @@ ax.set_xlabel(xlabel)
 ax.set_ylabel(ylabel)
 ax.set_zlabel(zlabel)
 
+#four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, angle_phi=60, angle_delta=0)
+#four_bar.update_positions()
+
 plt.ion()
 
 x1 = 0
 for i in range(frame):
 
     # ここで必要数分だけlineを引いて、add_lineしたらすべて表示できそう
-    x1 = x1+ 0.1
+#    four_bar.update_inverse_kinematics(x=four_bar.pos_ellipse[0] , y=four_bar.pos_ellipse[1] )
+#    four_bar.culc_ellipse()
+#    four_bar.update_position()
+
+
     line= art3d.Line3D([x1,0.2],[0.3,0.4],[0,0], color = 'c')
     ax.add_line(line)
 
