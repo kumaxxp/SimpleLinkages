@@ -40,20 +40,24 @@ CENTER_COLOR_ARC = (240, 220, 220)
 G_RADIUS = 15
 G_COLOR = (0, 0, 200)
 
-RECT_LEN = 40
 RECT_COLOR = (50, 50, 50)
+
+#モータの短辺の長さ(m)
+RECT_LEN:float = 0.020
+MOTOR_DEF:float = 0.01986
+MOTOR_GUIDE:float = 0.004
 
 # 四節リンクを表すクラス
 class FourBarLinkage:
-    def __init__(self, a, b, e, angle_phi, angle_delta):
+    def __init__(self, a, b, e, g, angle_phi, angle_delta):
         self.a : float = a
         self.b : float = b
         self.c : float = a
         self.d : float = b
         self.e : float = e
 
-        self.f : float = math.sqrt(2* ((RECT_LEN * 2) ** 2))    # 113.13
-        self.g : float = 50
+        self.f : float = math.sqrt((MOTOR_DEF ** 2) + (MOTOR_DEF + MOTOR_GUIDE)**2)    # 113.13
+        self.g : float = g
 
         self.t = 0
         self.pos_ellipse = (100, 100)
@@ -80,7 +84,7 @@ class FourBarLinkage:
 
 
         #self.F = (self.D[0] + self.f * math.cos(self.delta), self.D[1] + self.f * math.sin(self.delta))
-        self.F = (self.D[0] + RECT_LEN*2, self.D[1] + RECT_LEN*2)
+        self.F = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
         self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
 
@@ -184,8 +188,8 @@ class FourBarLinkage:
         self.update_positions()
 
     def _convert_coordinate(self, pos: tuple, offset_x: int = 400, offset_y: int = 200) -> tuple:
-        pos_int_x = int(pos[0]) + offset_x
-        pos_int_y = -int(pos[1]) + offset_y
+        pos_int_x = int(pos[0]*1000*4) + offset_x
+        pos_int_y = -int(pos[1]*1000*4) + offset_y
         pos_int = (pos_int_x, pos_int_y)
         return pos_int
 
@@ -236,16 +240,16 @@ class FourBarLinkage:
             angle=0, startAngle=angle_gamma_st, endAngle=angle_gamma_ed, color=CENTER_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
         # モーターを互い違いに2配置するイメージ
-        pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN)
-        pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] +RECT_LEN)
-        cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
+    #    pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN)
+    #    pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] +RECT_LEN)
+    #    cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
 
-        pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN*3)
-        pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] -RECT_LEN)
-        cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
+    #    pos1 = (pos_D_int[0] - RECT_LEN, pos_D_int[1] -RECT_LEN*3)
+    #    pos2 = (pos_D_int[0] + RECT_LEN*3, pos_D_int[1] -RECT_LEN)
+    #    cv2.rectangle(image, pt1=pos1, pt2=pos2, color=RECT_COLOR, thickness=1, lineType=cv2.LINE_4, shift=0)
 
-        pos_motor = (pos_D_int[0] + RECT_LEN*2, pos_D_int[1] - RECT_LEN*2)
-        cv2.circle(image, center=pos_motor, radius=PIN_RADIUS, color=CENTER_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+    #    pos_motor = (pos_D_int[0] + RECT_LEN*2, pos_D_int[1] - RECT_LEN*2)
+    #    cv2.circle(image, center=pos_motor, radius=PIN_RADIUS, color=CENTER_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         # linkを描画する
         cv2.line(image, pt1=pos_A_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -333,15 +337,15 @@ class FourBarLinkage:
 
     def culc_ellipse(self):
         self.pos_ellipse = self.ellipse_xy(self.t)
-        self.t += 10
+        self.t += 1
 
     def ellipse_xy(self, t:float) -> Tuple[float, float]:
-        a = 150
-        b = 20
+        a = 0.04
+        b = 0.01
         
         r = -math.pi * (1/1000)*t *1.5
         x = a * math.cos(r)
-        y = b * math.sin(r) - 300
+        y = b * math.sin(r) - 0.070
 
         return x,y
 
