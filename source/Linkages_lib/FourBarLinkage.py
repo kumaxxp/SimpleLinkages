@@ -152,7 +152,7 @@ class FourBarLinkage:
 
     def culc_ellipse(self):
         self.pos_ellipse = self.ellipse_xy(self.t)
-        self.t += 1
+        self.t += 10
 
     def ellipse_xy(self, t:float) -> tuple:
         a = 0.04

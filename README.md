@@ -41,13 +41,7 @@ moviepy 1.0.3
 
 pip install moviepy 
 
-pip install pyqtgraph
-pip install PyQt5
-sudo apt-get install python3-pyqt5
-
-## 表示にpyQtGraphを使う
-ライセンス的にpyQtGraphを使うとめんどくさいことになりそうですが、表示部分と計算部分を分けておけば問題ないでしょう。
-
+Circle3D
 
 ## minicondaにsympyをインストールする
 conda install sympy

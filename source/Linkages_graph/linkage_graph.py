@@ -8,6 +8,8 @@ import matplotlib
 import matplotlib.pyplot as plt # グラフ表示のため
 from mpl_toolkits.mplot3d import Axes3D # ３Dグラフ作成のため
 import mpl_toolkits.mplot3d.art3d as art3d
+from matplotlib.patches import Arc
+from matplotlib.patches import Circle
 
 import Linkages_lib.FourBarLinkage as FourBarLinkage
 
@@ -61,9 +63,10 @@ class linkage_graph:
         self.fig = plt.figure() # figureオブジェクトを作る
         self.ax = Axes3D(self.fig)
 
-        self.ax.w_xaxis.set_pane_color((0., 0., 0., 0.))  # ３dグラフの背景を透明にする　最初の一回だけでOK
-        self.ax.w_yaxis.set_pane_color((0., 0., 0., 0.))  # ３dグラフの背景を透明にする
-        self.ax.w_zaxis.set_pane_color((0., 0., 0., 0.))  # ３dグラフの背景を透明にする
+        # ３dグラフの背景を透明にする　最初の一回だけでOK
+        self.ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        self.ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 
         # plot setting
         self.ax.set_zlim(self.zMin, self.zMax) # z軸固定
@@ -74,31 +77,53 @@ class linkage_graph:
         self.ax.set_zlabel(self.zlabel)
 
         plt.ion()
-
-    def draw(self, four_bar:FourBarLinkage):
-
-        # ここで必要数分だけlineを引いて、add_lineしたらすべて表示できそう
+        self.ax.view_init(elev=8, azim=28)
         
-        line_a= art3d.Line3D([four_bar.A[0],four_bar.D[0]],[four_bar.A[1],four_bar.D[1]],[0,0], color = 'c')
+    def draw_link(self, four_bar:FourBarLinkage, z:float = 0):
+        
+        aZ = [z,z]
+        line_a= art3d.Line3D(aZ, [four_bar.A[0],four_bar.D[0]],[four_bar.A[1],four_bar.D[1]], color = 'r')
         self.ax.add_line(line_a)
 
-        line_b= art3d.Line3D([four_bar.A[0],four_bar.B[0]],[four_bar.A[1],four_bar.B[1]],[0,0], color = 'c')
+        line_b= art3d.Line3D(aZ, [four_bar.A[0],four_bar.B[0]],[four_bar.A[1],four_bar.B[1]], color = 'c')
         self.ax.add_line(line_b)
 
-        line_c= art3d.Line3D([four_bar.C[0],four_bar.B[0]],[four_bar.C[1],four_bar.B[1]],[0,0], color = 'c')
+        line_c= art3d.Line3D(aZ, [four_bar.C[0],four_bar.B[0]],[four_bar.C[1],four_bar.B[1]], color = 'c')
         self.ax.add_line(line_c)
 
-        line_d= art3d.Line3D([four_bar.C[0],four_bar.D[0]],[four_bar.C[1],four_bar.D[1]],[0,0], color = 'c')
+        line_d= art3d.Line3D(aZ, [four_bar.C[0],four_bar.D[0]],[four_bar.C[1],four_bar.D[1]], color = 'b')
         self.ax.add_line(line_d)
 
-
-        line_e= art3d.Line3D([four_bar.B[0],four_bar.E[0]],[four_bar.B[1],four_bar.E[1]],[0,0], color = 'c')
+        line_e= art3d.Line3D(aZ, [four_bar.B[0],four_bar.E[0]],[four_bar.B[1],four_bar.E[1]], color = 'c')
         self.ax.add_line(line_e)
 
-        print(four_bar.A,four_bar.C)
+        line_f= art3d.Line3D(aZ, [four_bar.D[0],four_bar.F[0]],[four_bar.D[1],four_bar.F[1]], color = 'g')
+        self.ax.add_line(line_f)
+
+        line_g= art3d.Line3D(aZ, [four_bar.G[0],four_bar.F[0]],[four_bar.G[1],four_bar.F[1]], color = 'r')
+        self.ax.add_line(line_g)
+
+        line_h= art3d.Line3D(aZ, [four_bar.G[0],four_bar.H[0]],[four_bar.G[1],four_bar.H[1]], color = 'c')
+        self.ax.add_line(line_h)
+
+        line_dd= art3d.Line3D(aZ, [four_bar.D[0],four_bar.H[0]],[four_bar.D[1],four_bar.H[1]], color = 'b')
+        self.ax.add_line(line_dd)
+
+        q = Arc((four_bar.D[0], four_bar.D[1]), width=0.005, height=0.005, angle=0, theta1=0, theta2=90, color="blue")
+        self.ax.add_patch(q)
+        art3d.pathpatch_2d_to_3d(q, z=z, zdir="x")
+
+    def draw(self, four_bar_front:FourBarLinkage, four_bar_rear):
+
+        # リンクの座標を描画する
+        self.draw_link(four_bar_front, 0)
+        self.draw_link(four_bar_rear, 0.02)
 
         plt.draw()
+        self.ax.set_xlim(-0.1, 0.1)
+        self.ax.set_ylim(-0.1, 0.1)
+        self.ax.set_zlim(-0.1, 0.1)
+        
         plt.pause(self.sleepTime)
+        
         plt.cla()
-
-
