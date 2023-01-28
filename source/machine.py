@@ -72,10 +72,12 @@ def link_machine():
             four_bar.set_delta(delta)
 
         four_bar.update_positions()
+        four_bar.update_gravity()
+        
         four_bar2.update_positions()
 
-        print(four_bar.A, four_bar2.A)
-        cv_2dview.draw(four_bar, four_bar2)
+        #cv_2dview.draw(four_bar, four_bar2)
+        cv_2dview.draw(four_bar, None)
 
         if cv2.waitKey(1) == ord('q'):
             break

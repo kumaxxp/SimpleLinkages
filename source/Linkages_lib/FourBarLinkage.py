@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+import numpy as np
 
 #モータの短辺の長さ(m)
 RECT_LEN:float = 0.020
@@ -33,6 +34,9 @@ class FourBarLinkage:
         self.delta = math.radians(angle_delta)
         self.gamma = math.radians(self.angle_gamma)
         self.phi_delta = math.radians(angle_phi + angle_delta)
+
+        self.angle_alpha = 0.0
+        self.alpha = 0.0
 
         # 各点の座標を表す変数を定義する
         self.D = (0, 0)
@@ -152,7 +156,7 @@ class FourBarLinkage:
 
     def culc_ellipse(self):
         self.pos_ellipse = self.ellipse_xy(self.t)
-        self.t += 10
+        self.t += 1
 
     def ellipse_xy(self, t:float) -> tuple:
         a = 0.04
@@ -163,4 +167,60 @@ class FourBarLinkage:
         y = b * math.sin(r) - 0.070
 
         return x,y
+
+    def update_gravity(self):
+        x : float = self.E[0] - self.I[0]
+        y : float = self.E[1] - self.I[1]
+        self.alpha = math.atan2(y, x)
+        self.angle_alpha = math.degrees(self.alpha)
+
+        angle_def = -(self.angle_alpha - (-90.0))
+        print(angle_def)
+        d_rad = math.radians(angle_def)
+
+        # D(0, 0) を中心に固定し、
+        # DEの角度を算出
+        # DEの角度を-90度になるようにポイントを座標変換する
+
+        self.rA = self.rotation(d_rad, self.I[0], self.I[1], self.A[0], self.A[1])
+        self.rB = self.rotation(d_rad, self.I[0], self.I[1], self.B[0], self.B[1])
+        self.rC = self.rotation(d_rad, self.I[0], self.I[1], self.C[0], self.C[1])
+        self.rD = self.rotation(d_rad, self.I[0], self.I[1], self.D[0], self.D[1])
+        self.rE = self.rotation(d_rad, self.I[0], self.I[1], self.E[0], self.E[1])
+        self.rF = self.rotation(d_rad, self.I[0], self.I[1], self.F[0], self.F[1])
+        self.rG = self.rotation(d_rad, self.I[0], self.I[1], self.G[0], self.G[1])
+        self.rH = self.rotation(d_rad, self.I[0], self.I[1], self.H[0], self.H[1])
+        self.rI = self.rotation(d_rad, self.I[0], self.I[1], self.I[0], self.I[1])
+
+        std_x  = self.rE[0]
+        std_y  = self.rE[1]
+
+        self.rA = self.shift_point(std_x, std_y, self.rA[0], self.rA[1])
+        self.rB = self.shift_point(std_x, std_y, self.rB[0], self.rB[1])
+        self.rC = self.shift_point(std_x, std_y, self.rC[0], self.rC[1])
+        self.rD = self.shift_point(std_x, std_y, self.rD[0], self.rD[1])
+        self.rE = self.shift_point(std_x, std_y, self.rE[0], self.rE[1])
+        self.rF = self.shift_point(std_x, std_y, self.rF[0], self.rF[1])
+        self.rG = self.shift_point(std_x, std_y, self.rG[0], self.rG[1])
+        self.rH = self.shift_point(std_x, std_y, self.rH[0], self.rH[1])
+        self.rI = self.shift_point(std_x, std_y, self.rI[0], self.rI[1])
+
+
+    def rotation(self, d_rad:float, Cx:float, Cy:float, x:float, y:float):
+        # ラジアンで角度を指定してポイントを回転する
+
+        rot = np.array([[np.cos(d_rad), -np.sin(d_rad), Cx - Cx * np.cos(d_rad)+Cy*np.sin(d_rad)],
+                        [np.sin(d_rad), np.cos(d_rad), Cy-Cx * np.sin(d_rad)-Cy*np.cos(d_rad)],
+                        [0, 0, 1]])
+
+        #print(rot)
+
+        return np.dot(rot, (x, y, 1))
+
+    def shift_point(self, Cx:float, Cy:float, x:float, y:float, offset_y:float = -0.08):
+        # 基準位置を指定して、ポイントをオフセットする
+        Sx = x - Cx
+        Sy = y - Cy + offset_y
+
+        return Sx, Sy
 

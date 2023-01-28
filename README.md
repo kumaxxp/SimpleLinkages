@@ -48,4 +48,5 @@ conda install sympy
 
 ```
 
-
+PyDyで計算できそう
+https://pydy.readthedocs.io/en/stable/examples/rocket-car.html
