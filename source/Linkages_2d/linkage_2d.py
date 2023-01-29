@@ -44,7 +44,7 @@ def create_mp4(in_dir, out_filename, fps=24):
 
 # 2D表示用クラス
 class linkage_2d:
-    def __init__(self, width:int = 800, height:int = 600, rec:bool = False):
+    def __init__(self, width:int = 1000, height:int = 600, rec:bool = False):
 
         # dirフォルダが無い時に新規作成
         dir = './image/'
@@ -278,3 +278,4 @@ class linkage_2d:
         cv2.line(image, pt1=pos_rI_int, pt2=pos_rE_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         cv2.circle(image, center=pos_rD_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.circle(image, center=pos_rI_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)

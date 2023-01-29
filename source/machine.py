@@ -28,23 +28,20 @@ def link_machine():
     four_bar2.update_positions()
 
     cv2.namedWindow('panel')
-    cv2.createTrackbar('mode', 'panel', 0, 3, lambda x: None)
+    cv2.createTrackbar('mode', 'panel', 1, 3, lambda x: None)
     cv2.createTrackbar('phi', 'panel', 90, 360, lambda x: None)
     cv2.createTrackbar('delta', 'panel', 210, 360, lambda x: None)
     cv2.createTrackbar('gamma', 'panel', 120, 360, lambda x: None)
-    cv2.createTrackbar('Ex', 'panel', 200, 400, lambda x: None)
-    cv2.createTrackbar('Ey', 'panel', 30, 100, lambda x: None)
-
-    Ex = -200
-    Ey = -200
+    cv2.createTrackbar('Ex', 'panel', 100, 200, lambda x: None)
+    cv2.createTrackbar('Ey', 'panel', 79, 100, lambda x: None)
 
     while True:
 
         # 角度変更
         x_offset = cv2.getTrackbarPos('Ex', 'panel')
         y_offset = cv2.getTrackbarPos('Ey', 'panel')
-        x_in = Ex + x_offset
-        y_in = Ey - y_offset
+        x_in = 0.001 * (x_offset - 100)
+        y_in = -0.001 * y_offset
 
         # モードの切替
         mode = cv2.getTrackbarPos('mode', 'panel')
@@ -54,6 +51,8 @@ def link_machine():
 
             four_bar2.update_inverse_kinematics(x=four_bar2.pos_ellipse[0] , y=four_bar2.pos_ellipse[1] )
             four_bar2.culc_ellipse()
+
+            # print(four_bar2.pos_ellipse[0], four_bar2.pos_ellipse[1])
 
         elif mode == 1: # 手動で逆運動で操作
             four_bar.update_inverse_kinematics(x=x_in, y=y_in)
@@ -72,9 +71,10 @@ def link_machine():
             four_bar.set_delta(delta)
 
         four_bar.update_positions()
+        #four_bar.update_stand()
         four_bar.update_gravity()
         
-        four_bar2.update_positions()
+        four_bar2.update_stand()
 
         #cv_2dview.draw(four_bar, four_bar2)
         cv_2dview.draw(four_bar, None)

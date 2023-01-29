@@ -3,6 +3,7 @@
 
 import math
 import numpy as np
+import time
 
 #モータの短辺の長さ(m)
 RECT_LEN:float = 0.020
@@ -54,6 +55,11 @@ class FourBarLinkage:
         self.F = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
         self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
+        self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
+
+        # 足先のT字構成
+        self.I = (0,0)
+        self.J = (0,0)
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -118,10 +124,16 @@ class FourBarLinkage:
         a_cos:float
         a_tan:float
 
-        # δを計算
-        data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+        # δを計算--------
+        try:
+            data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+        except ZeroDivisionError:
+            print(x,y)
+            return
+
         if data > 1 or data < -1:
             return
+        # ---------------
 
         a_cos = math.acos(data)
         a_tan = math.atan2(y,x)
@@ -168,14 +180,15 @@ class FourBarLinkage:
 
         return x,y
 
-    def update_gravity(self):
+    def update_stand(self):
+        # 足先の場所を固定して、倒立振子のようにする
         x : float = self.E[0] - self.I[0]
         y : float = self.E[1] - self.I[1]
         self.alpha = math.atan2(y, x)
         self.angle_alpha = math.degrees(self.alpha)
 
         angle_def = -(self.angle_alpha - (-90.0))
-        print(angle_def)
+        #print(angle_def)
         d_rad = math.radians(angle_def)
 
         # D(0, 0) を中心に固定し、
@@ -205,6 +218,26 @@ class FourBarLinkage:
         self.rH = self.shift_point(std_x, std_y, self.rH[0], self.rH[1])
         self.rI = self.shift_point(std_x, std_y, self.rI[0], self.rI[1])
 
+    def update_gravity(self):
+        # 足先の場所を固定して、倒立振子のようにする
+
+        
+
+        # I-Eのラインを倒立振子として重力を考慮する
+
+        std_x  = self.E[0]
+        std_y  = self.E[1]
+
+        self.rA = self.shift_point(std_x, std_y, self.A[0], self.A[1])
+        self.rB = self.shift_point(std_x, std_y, self.B[0], self.B[1])
+        self.rC = self.shift_point(std_x, std_y, self.C[0], self.C[1])
+        self.rD = self.shift_point(std_x, std_y, self.D[0], self.D[1])
+        self.rE = self.shift_point(std_x, std_y, self.E[0], self.E[1])
+        self.rF = self.shift_point(std_x, std_y, self.F[0], self.F[1])
+        self.rG = self.shift_point(std_x, std_y, self.G[0], self.G[1])
+        self.rH = self.shift_point(std_x, std_y, self.H[0], self.H[1])
+        self.rI = self.shift_point(std_x, std_y, self.I[0], self.I[1])
+
 
     def rotation(self, d_rad:float, Cx:float, Cy:float, x:float, y:float):
         # ラジアンで角度を指定してポイントを回転する
@@ -224,3 +257,15 @@ class FourBarLinkage:
 
         return Sx, Sy
 
+if __name__ == '__main__':
+    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, angle_phi=60, angle_delta=0)
+
+    while True:
+        x_in = 0.0
+        y_in = -0.076
+
+        four_bar.update_inverse_kinematics(x=x_in, y=y_in)
+        four_bar.update_positions()
+        four_bar.update_stand()
+
+        time.sleep(0.1)
