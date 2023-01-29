@@ -12,7 +12,7 @@ MOTOR_GUIDE:float = 0.004
 
 # 四節リンクを表すクラス
 class FourBarLinkage:
-    def __init__(self, a, b, e, g, angle_phi, angle_delta, offset = 0):
+    def __init__(self, a, b, e, g, j, k, angle_phi, angle_delta, offset = 0):
         self.a : float = a
         self.b : float = b
         self.c : float = a
@@ -21,6 +21,8 @@ class FourBarLinkage:
 
         self.f : float = math.sqrt((MOTOR_DEF ** 2) + (MOTOR_DEF + MOTOR_GUIDE)**2)    # 113.13
         self.g : float = g
+        self.j : float = j
+        self.k : float = k
 
         self.offset : float = offset
 
@@ -58,8 +60,8 @@ class FourBarLinkage:
         self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
 
         # 足先のT字構成
-        self.I = (0,0)
         self.J = (0,0)
+        self.rJ = (0,0)
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -99,6 +101,15 @@ class FourBarLinkage:
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
 
         self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
+
+        J = self.intersection_point(self.C, self.k, self.E, self.j, self.B)
+        if J == None:
+            self.J = (0, 0)
+        else:
+            self.J = J
+
+        # 足の先端を伸ばす
+        self.K = self.point_on_extension_by_angle_AB(A = self.E, B = self.J, angle = math.radians(-30), l = self.k)
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -182,8 +193,8 @@ class FourBarLinkage:
 
     def update_stand(self):
         # 足先の場所を固定して、倒立振子のようにする
-        x : float = self.E[0] - self.I[0]
-        y : float = self.E[1] - self.I[1]
+        x : float = self.J[0] - self.I[0]
+        y : float = self.J[1] - self.I[1]
         self.alpha = math.atan2(y, x)
         self.angle_alpha = math.degrees(self.alpha)
 
@@ -204,9 +215,11 @@ class FourBarLinkage:
         self.rG = self.rotation(d_rad, self.I[0], self.I[1], self.G[0], self.G[1])
         self.rH = self.rotation(d_rad, self.I[0], self.I[1], self.H[0], self.H[1])
         self.rI = self.rotation(d_rad, self.I[0], self.I[1], self.I[0], self.I[1])
+        self.rJ = self.rotation(d_rad, self.I[0], self.I[1], self.J[0], self.J[1])
+        self.rK = self.rotation(d_rad, self.I[0], self.I[1], self.K[0], self.K[1])
 
-        std_x  = self.rE[0]
-        std_y  = self.rE[1]
+        std_x  = self.rJ[0]
+        std_y  = self.rJ[1]
 
         self.rA = self.shift_point(std_x, std_y, self.rA[0], self.rA[1])
         self.rB = self.shift_point(std_x, std_y, self.rB[0], self.rB[1])
@@ -217,6 +230,10 @@ class FourBarLinkage:
         self.rG = self.shift_point(std_x, std_y, self.rG[0], self.rG[1])
         self.rH = self.shift_point(std_x, std_y, self.rH[0], self.rH[1])
         self.rI = self.shift_point(std_x, std_y, self.rI[0], self.rI[1])
+        self.rJ = self.shift_point(std_x, std_y, self.rJ[0], self.rJ[1])
+        self.rK = self.shift_point(std_x, std_y, self.rK[0], self.rK[1])
+
+        #print(self.rJ)
 
     def update_gravity(self):
         # 足先の場所を固定して、倒立振子のようにする
@@ -225,8 +242,8 @@ class FourBarLinkage:
 
         # I-Eのラインを倒立振子として重力を考慮する
 
-        std_x  = self.E[0]
-        std_y  = self.E[1]
+        std_x  = self.J[0]
+        std_y  = self.J[1]
 
         self.rA = self.shift_point(std_x, std_y, self.A[0], self.A[1])
         self.rB = self.shift_point(std_x, std_y, self.B[0], self.B[1])
@@ -237,6 +254,8 @@ class FourBarLinkage:
         self.rG = self.shift_point(std_x, std_y, self.G[0], self.G[1])
         self.rH = self.shift_point(std_x, std_y, self.H[0], self.H[1])
         self.rI = self.shift_point(std_x, std_y, self.I[0], self.I[1])
+        self.rJ = self.shift_point(std_x, std_y, self.J[0], self.J[1])
+        self.rK = self.shift_point(std_x, std_y, self.K[0], self.K[1])
 
 
     def rotation(self, d_rad:float, Cx:float, Cy:float, x:float, y:float):
@@ -256,6 +275,50 @@ class FourBarLinkage:
         Sy = y - Cy + offset_y
 
         return Sx, Sy
+
+    # 円同士の距離を計算し、基準点から遠い方を選択する
+    def intersection_point(self, c1: tuple, r1: float, c2: tuple, r2: float, point: tuple):
+        if not all(map(lambda x: isinstance(x, (int, float)), c1+c2+point)):
+            raise TypeError("c1, c2 and point must be tuple of int or float")
+        if not all(map(lambda x: isinstance(x, (int, float)), (r1, r2))):
+            raise TypeError("r1, r2 must be int or float")
+
+        x1, y1 = c1
+        x2, y2 = c2
+        d = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        if d > r1 + r2 or d < abs(r1 - r2):
+            return None # no intersection
+        else:
+            a = (r1**2 - r2**2 + d**2) / (2 * d)
+            h = math.sqrt(r1**2 - a**2)
+            xm = x1 + a * (x2 - x1) / d
+            ym = y1 + a * (y2 - y1) / d
+            xs1 = xm + h * (y2 - y1) / d
+            xs2 = xm - h * (y2 - y1) / d
+            ys1 = ym - h * (x2 - x1) / d
+            ys2 = ym + h * (x2 - x1) / d
+            distance1 = math.sqrt((xs1 - point[0])**2 + (ys1 - point[1])**2)
+            distance2 = math.sqrt((xs2 - point[0])**2 + (ys2 - point[1])**2)
+            if distance1 > distance2:
+                return xs1, ys1
+            else:
+                return xs2, ys2
+
+    # A, B 二点の直線延長上に B から l の距離にある点を計算する
+    def point_on_extension(self, A, B, l):
+        A = np.array(A)
+        B = np.array(B)
+        AB = B - A
+        AB_unit = AB / np.linalg.norm(AB)
+        return B + l * AB_unit
+
+    def point_on_extension_by_angle_AB(self, A, B, angle, l):
+        AB = np.array(B) - np.array(A)
+        AB = AB / np.linalg.norm(AB)
+        R = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        unit_vector = np.dot(AB, R)
+        return B + l * unit_vector
+
 
 if __name__ == '__main__':
     four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, angle_phi=60, angle_delta=0)

@@ -21,10 +21,12 @@ def link_machine():
     # a : b : e = 100 : 160 : 100
     # f : g = 113.13 : 50
     # Z平面の位置
-    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, angle_phi=60, angle_delta=0)
+#    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.04, k=0.036, angle_phi=60, angle_delta=0)
+#    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.025313, k=0.025313, angle_phi=60, angle_delta=0)
+    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.025313, k=0.03, angle_phi=60, angle_delta=0)
     four_bar.update_positions()
 
-    four_bar2 = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, angle_phi=60, angle_delta=0, offset = 300)
+    four_bar2 = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.04, k=0.036, angle_phi=60, angle_delta=0, offset = 300)
     four_bar2.update_positions()
 
     cv2.namedWindow('panel')
