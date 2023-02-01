@@ -83,6 +83,7 @@ class linkage_2d:
 
         # Z軸平面 0 に描画する
         self.draw_link(image = self.img, four_bar = four_bar_front)
+        #self.draw_link_right(image = self.img, four_bar = four_bar_front)
 
         # Z軸平面 1 に描画する
         if four_bar_rear != None:
@@ -111,7 +112,7 @@ class linkage_2d:
             self.create_mp4(dir, 'output.mp4', 24)
             self.shutil.rmtree(dir)
 
-    def _convert_coordinate(self, pos: tuple, offset_x: int = 350, offset_y: int = 200) -> tuple:
+    def _convert_coordinate(self, pos: tuple, offset_x: int = 350, offset_y: int = 250) -> tuple:
         pos_int_x = int(pos[0]*1000*4) + offset_x
         pos_int_y = -int(pos[1]*1000*4) + offset_y
         pos_int = (pos_int_x, pos_int_y)
@@ -145,13 +146,15 @@ class linkage_2d:
         pos_B_int = self._convert_coordinate(four_bar.B)
         pos_C_int = self._convert_coordinate(four_bar.C)
         pos_D_int = self._convert_coordinate(four_bar.D)
-        pos_E_int = self._convert_coordinate(four_bar.E)
+        #pos_E_int = self._convert_coordinate(four_bar.E)
         pos_F_int = self._convert_coordinate(four_bar.F)
         pos_G_int = self._convert_coordinate(four_bar.G)
         pos_H_int = self._convert_coordinate(four_bar.H)
         pos_I_int = self._convert_coordinate(four_bar.I)
-        pos_J_int = self._convert_coordinate(four_bar.J)
+        #pos_J_int = self._convert_coordinate(four_bar.J)
         pos_K_int = self._convert_coordinate(four_bar.K)
+
+        pos_L_int = self._convert_coordinate(four_bar.L)
 
         # cv2の座標系に回転角を変換する
         # 角度は±反転し、反時計回りで塗りつぶせるように、
@@ -176,14 +179,14 @@ class linkage_2d:
         cv2.line(image, pt1=pos_B_int, pt2=pos_C_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_B_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_F_int, pt2=pos_G_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_G_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_D_int, pt2=pos_F_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_D_int, pt2=pos_F_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         #cv2.line(image, pt1=pos_J_int, pt2=pos_C_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_J_int, pt2=pos_E_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_J_int, pt2=pos_K_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_C_int, pt2=pos_K_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        cv2.line(image, pt1=pos_D_int, pt2=pos_L_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 頂点Dを描画する。Φ/Φ1/Φ2を表示
         cv2.circle(image, center=pos_A_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -202,21 +205,20 @@ class linkage_2d:
         cv2.ellipse(image, center=pos_D_int, axes=(PIN_RADIUS, PIN_RADIUS),
             angle=0, startAngle=angle_D_st, endAngle=angle_D_ed, color=PIN_COLOR_ARC, thickness=-1, lineType=cv2.LINE_AA)
 
-        cv2.circle(image, center=pos_E_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-
         cv2.circle(image, center=pos_F_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.circle(image, center=pos_G_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.circle(image, center=pos_G_int, radius=G_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_I_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.circle(image, center=pos_J_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_K_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        
+        cv2.circle(image, center=pos_L_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         
         # 対角線
         #cv2.line(image, pt1=pos_D_int, pt2=pos_B_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
         # 重心からエンドエフェクトまで
-        cv2.line(image, pt1=pos_I_int, pt2=pos_J_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_I_int, pt2=pos_K_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_I_int, pt2=pos_E_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_I_int, pt2=pos_C_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_I_int, pt2=pos_K_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_I_int, pt2=pos_B_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         # テキスト
         cv2.putText(img = image, text = 'A', org = pos_A_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
@@ -227,8 +229,6 @@ class linkage_2d:
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'D', org = pos_D_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
-        cv2.putText(img = image, text = 'E', org = pos_E_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
-            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'F', org = pos_F_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'G', org = pos_G_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
@@ -237,9 +237,9 @@ class linkage_2d:
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'I', org = pos_I_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
-        cv2.putText(img = image, text = 'J', org = pos_J_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
-            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'K', org = pos_K_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'L', org = pos_L_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
         pos_int = (int(pos_A_int[0]), int(pos_A_int[1]) + 20)
@@ -248,25 +248,29 @@ class linkage_2d:
         cv2.putText(img = image, text = str(four_bar.angle_B), org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
         # 座標表示
-        pos_int = (int(pos_E_int[0]), int(pos_E_int[1]) + 20)
-        cv2.putText(img = image, text = str(four_bar.E), 
-            org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
-            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
-
         pos_int = (int(pos_D_int[0]), int(pos_D_int[1]) + 20)
         cv2.putText(img = image, text = str(four_bar.D), 
             org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
-        pos_ellipse_int = self._convert_coordinate(four_bar.pos_ellipse)
-        cv2.circle(image, center=pos_ellipse_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+    #    pos_ellipse_int = self._convert_coordinate(four_bar.pos_ellipse)
+    #    cv2.circle(image, center=pos_ellipse_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
-        # 鉛直方向の角度を表示
-        pos_int = (int(pos_E_int[0]), int(pos_E_int[1]) + 40)
-        cv2.putText(img = image, text = str(four_bar.angle_alpha), 
-            org = pos_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
-            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        pos_int = (pos_I_int[0], pos_I_int[1]+100)
+        cv2.line(image, pt1=pos_I_int, pt2=pos_int, color=LINK_COLOR_B , thickness=3, lineType=cv2.LINE_AA, shift=0)
 
+        # モータ3つの塊のボックス
+        pos_RT = pos_L_int
+        pos_RB = (pos_L_int[0], pos_D_int[1])
+        pos_LT = (pos_D_int[0], pos_L_int[1])
+        pos_LB = pos_D_int
+        cv2.line(image, pt1=pos_LT, pt2=pos_RT, color=LINK_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_LB, pt2=pos_RB, color=LINK_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_LT, pt2=pos_LB, color=LINK_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_RT, pt2=pos_RB, color=LINK_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+
+
+    def draw_link_right(self, image: np.ndarray, four_bar:FourBarLinkage) -> None:
 
         # 脚の角度を鉛直方向に固定した場合の画像
         # 画面の少し右方向に並べて表示する
@@ -274,14 +278,15 @@ class linkage_2d:
         pos_rB_int = self._convert_coordinate_right(four_bar.rB)
         pos_rC_int = self._convert_coordinate_right(four_bar.rC)
         pos_rD_int = self._convert_coordinate_right(four_bar.rD)
-        pos_rE_int = self._convert_coordinate_right(four_bar.rE)
+        #pos_rE_int = self._convert_coordinate_right(four_bar.rE)
 
         pos_rF_int = self._convert_coordinate_right(four_bar.rF)
         pos_rG_int = self._convert_coordinate_right(four_bar.rG)
         pos_rH_int = self._convert_coordinate_right(four_bar.rH)
         pos_rI_int = self._convert_coordinate_right(four_bar.rI)
-        pos_rJ_int = self._convert_coordinate_right(four_bar.rJ)
+        #pos_rJ_int = self._convert_coordinate_right(four_bar.rJ)
         pos_rK_int = self._convert_coordinate_right(four_bar.rK)
+        pos_rL_int = self._convert_coordinate_right(four_bar.rL)
 
         pos_int = (pos_rI_int[0], pos_rI_int[1]+100)
 
@@ -289,21 +294,21 @@ class linkage_2d:
         cv2.line(image, pt1=pos_rB_int, pt2=pos_rC_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rC_int, pt2=pos_rD_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rD_int, pt2=pos_rA_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rB_int, pt2=pos_rE_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rF_int, pt2=pos_rG_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rD_int, pt2=pos_rH_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rG_int, pt2=pos_rH_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rD_int, pt2=pos_rF_int, color=LINK_COLOR_G, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rI_int, pt2=pos_rJ_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_rC_int, pt2=pos_rK_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        cv2.line(image, pt1=pos_rI_int, pt2=pos_rC_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_rI_int, pt2=pos_rK_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rI_int, pt2=pos_rE_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rJ_int, pt2=pos_rE_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rJ_int, pt2=pos_rC_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_rJ_int, pt2=pos_rK_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_rI_int, pt2=pos_rB_int, color=G_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
 
         cv2.line(image, pt1=pos_rI_int, pt2=pos_int, color=LINK_COLOR_B , thickness=3, lineType=cv2.LINE_AA, shift=0)
 
+        cv2.line(image, pt1=pos_rL_int, pt2=pos_rD_int, color=LINK_COLOR_G , thickness=2, lineType=cv2.LINE_AA, shift=0)
+
         cv2.circle(image, center=pos_rD_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_rI_int, radius=G_RADIUS, color=G_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.circle(image, center=pos_rJ_int, radius=G_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        #cv2.circle(image, center=pos_rJ_int, radius=G_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_rK_int, radius=G_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)

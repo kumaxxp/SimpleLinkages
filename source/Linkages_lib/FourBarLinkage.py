@@ -12,12 +12,11 @@ MOTOR_GUIDE:float = 0.004
 
 # 四節リンクを表すクラス
 class FourBarLinkage:
-    def __init__(self, a, b, e, g, j, k, angle_phi, angle_delta, offset = 0):
+    def __init__(self, a, b, g, j, k, angle_phi, angle_delta, offset = 0):
         self.a : float = a
         self.b : float = b
         self.c : float = a
         self.d : float = b
-        self.e : float = e
 
         self.f : float = math.sqrt((MOTOR_DEF ** 2) + (MOTOR_DEF + MOTOR_GUIDE)**2)    # 113.13
         self.g : float = g
@@ -49,19 +48,22 @@ class FourBarLinkage:
         self.C = (b * math.cos(self.phi) * math.cos(self.delta) - b * math.sin(self.phi) * math.sin(self.delta),
                 b * math.cos(self.phi) * math.sin(self.delta) + b * math.sin(self.phi) * math.cos(self.delta))
 
-        self.E = (a * math.cos(self.delta) + (b + e) * math.cos(self.phi_delta),
-                a * math.sin(self.delta) + (b + e) * math.sin(self.phi_delta))
-
-
-        #self.F = (self.D[0] + self.f * math.cos(self.delta), self.D[1] + self.f * math.sin(self.delta))
         self.F = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
         self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
-        self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
 
-        # 足先のT字構成
-        self.J = (0,0)
-        self.rJ = (0,0)
+        self.L = (self.F[0], self.F[1] + MOTOR_DEF + MOTOR_GUIDE)
+        # self.M = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
+        # self.N = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
+        # self.O = (self.D[0] + MOTOR_DEF, self.D[1] + MOTOR_DEF + MOTOR_GUIDE)
+
+        self.I = ((self.L[0] - self.D[0]) /2 ,(self.L[1] - self.D[1]) /2) 
+
+        # L-Dの成す角度を初期値とする
+        x : float = self.C[0] - self.I[0]
+        y : float = self.C[1] - self.I[1]
+        self.epsilon = math.atan2(y, x)
+        self.angle_epsilon = math.degrees(self.epsilon)
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - angle_phi
@@ -71,8 +73,6 @@ class FourBarLinkage:
 
         self.angle_phi1 = 0
         self.angle_phi2 = 0
-
-        self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
 
         self.update_positions()
 
@@ -92,24 +92,12 @@ class FourBarLinkage:
         self.C = (self.b * math.cos(self.phi) * math.cos(self.delta) - self.b * math.sin(self.phi) * math.sin(self.delta),
                 self.b * math.cos(self.phi) * math.sin(self.delta) + self.b * math.sin(self.phi) * math.cos(self.delta))
 
-        self.E = (self.a * math.cos(self.delta) + (self.b + self.e) * math.cos(self.phi_delta),
-                self.a * math.sin(self.delta) + (self.b + self.e) * math.sin(self.phi_delta))
-
-        self.L = math.sqrt((self.E[0] - self.E[0])**2 + (self.E[1] - self.E[1])**2)
-
         self.G = (self.F[0] + self.g * math.cos(self.gamma), self.F[1] + self.g * math.sin(self.gamma))
         self.H = (self.D[0] + self.g * math.cos(self.gamma), self.D[1] + self.g * math.sin(self.gamma))
-
-        self.I = ((self.F[0] - self.D[0]) /2 ,(self.F[1] - self.D[1]) /2) 
-
-        J = self.intersection_point(self.C, self.k, self.E, self.j, self.B)
-        if J == None:
-            self.J = (0, 0)
-        else:
-            self.J = J
+        self.I = ((self.L[0] - self.D[0]) /2 ,(self.L[1] - self.D[1]) /2) 
 
         # 足の先端を伸ばす
-        self.K = self.point_on_extension_by_angle_AB(A = self.E, B = self.J, angle = math.radians(-30), l = self.k)
+        self.K = self.point_on_extension_by_angle_AB(A = self.B, B = self.C, angle = math.radians(-15), l = self.k)
 
         # 各点の角度を表す変数を定義する
         self.angle_A = 180 - self.angle_phi
@@ -137,7 +125,8 @@ class FourBarLinkage:
 
         # δを計算--------
         try:
-            data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+        #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+            data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
         except ZeroDivisionError:
             print(x,y)
             return
@@ -177,6 +166,12 @@ class FourBarLinkage:
 
         self.update_positions()
 
+    def set_epsilon(self, angle):
+        self.angle_epsilon = angle
+        self.epsilon = math.radians(angle)
+
+        self.update_positions()
+
     def culc_ellipse(self):
         self.pos_ellipse = self.ellipse_xy(self.t)
         self.t += 1
@@ -193,8 +188,8 @@ class FourBarLinkage:
 
     def update_stand(self):
         # 足先の場所を固定して、倒立振子のようにする
-        x : float = self.J[0] - self.I[0]
-        y : float = self.J[1] - self.I[1]
+        x : float = self.C[0] - self.I[0]
+        y : float = self.C[1] - self.I[1]
         self.alpha = math.atan2(y, x)
         self.angle_alpha = math.degrees(self.alpha)
 
@@ -210,52 +205,80 @@ class FourBarLinkage:
         self.rB = self.rotation(d_rad, self.I[0], self.I[1], self.B[0], self.B[1])
         self.rC = self.rotation(d_rad, self.I[0], self.I[1], self.C[0], self.C[1])
         self.rD = self.rotation(d_rad, self.I[0], self.I[1], self.D[0], self.D[1])
-        self.rE = self.rotation(d_rad, self.I[0], self.I[1], self.E[0], self.E[1])
+        #self.rE = self.rotation(d_rad, self.I[0], self.I[1], self.E[0], self.E[1])
         self.rF = self.rotation(d_rad, self.I[0], self.I[1], self.F[0], self.F[1])
         self.rG = self.rotation(d_rad, self.I[0], self.I[1], self.G[0], self.G[1])
         self.rH = self.rotation(d_rad, self.I[0], self.I[1], self.H[0], self.H[1])
         self.rI = self.rotation(d_rad, self.I[0], self.I[1], self.I[0], self.I[1])
-        self.rJ = self.rotation(d_rad, self.I[0], self.I[1], self.J[0], self.J[1])
+        #self.rJ = self.rotation(d_rad, self.I[0], self.I[1], self.J[0], self.J[1])
         self.rK = self.rotation(d_rad, self.I[0], self.I[1], self.K[0], self.K[1])
 
-        std_x  = self.rJ[0]
-        std_y  = self.rJ[1]
+        self.rL = self.rotation(d_rad, self.I[0], self.I[1], self.L[0], self.L[1])
+
+        std_x  = self.rC[0]
+        std_y  = self.rC[1]
 
         self.rA = self.shift_point(std_x, std_y, self.rA[0], self.rA[1])
         self.rB = self.shift_point(std_x, std_y, self.rB[0], self.rB[1])
         self.rC = self.shift_point(std_x, std_y, self.rC[0], self.rC[1])
         self.rD = self.shift_point(std_x, std_y, self.rD[0], self.rD[1])
-        self.rE = self.shift_point(std_x, std_y, self.rE[0], self.rE[1])
+        #self.rE = self.shift_point(std_x, std_y, self.rE[0], self.rE[1])
         self.rF = self.shift_point(std_x, std_y, self.rF[0], self.rF[1])
         self.rG = self.shift_point(std_x, std_y, self.rG[0], self.rG[1])
         self.rH = self.shift_point(std_x, std_y, self.rH[0], self.rH[1])
         self.rI = self.shift_point(std_x, std_y, self.rI[0], self.rI[1])
-        self.rJ = self.shift_point(std_x, std_y, self.rJ[0], self.rJ[1])
+        #self.rJ = self.shift_point(std_x, std_y, self.rJ[0], self.rJ[1])
         self.rK = self.shift_point(std_x, std_y, self.rK[0], self.rK[1])
 
-        #print(self.rJ)
+        self.rL = self.shift_point(std_x, std_y, self.rL[0], self.rL[1])
+
 
     def update_gravity(self):
         # 足先の場所を固定して、倒立振子のようにする
+    #    x : float = self.D[0] - self.L[0]
+    #    y : float = self.D[1] - self.L[1]
+    #    self.alpha = math.atan2(y, x)
+    #    self.angle_alpha = math.degrees(self.alpha)
 
-        
+    #    angle_def = -(self.angle_alpha - (-90.0))
+    #    d_rad = math.radians(angle_def)
 
-        # I-Eのラインを倒立振子として重力を考慮する
+        # L を中心に固定し、
+        # D-Lの角度を算出
+        # D-Lの角度を-90度になるようにポイントを座標変換する
 
-        std_x  = self.J[0]
-        std_y  = self.J[1]
+        d_rad = self.epsilon
 
-        self.rA = self.shift_point(std_x, std_y, self.A[0], self.A[1])
-        self.rB = self.shift_point(std_x, std_y, self.B[0], self.B[1])
-        self.rC = self.shift_point(std_x, std_y, self.C[0], self.C[1])
-        self.rD = self.shift_point(std_x, std_y, self.D[0], self.D[1])
-        self.rE = self.shift_point(std_x, std_y, self.E[0], self.E[1])
-        self.rF = self.shift_point(std_x, std_y, self.F[0], self.F[1])
-        self.rG = self.shift_point(std_x, std_y, self.G[0], self.G[1])
-        self.rH = self.shift_point(std_x, std_y, self.H[0], self.H[1])
-        self.rI = self.shift_point(std_x, std_y, self.I[0], self.I[1])
-        self.rJ = self.shift_point(std_x, std_y, self.J[0], self.J[1])
-        self.rK = self.shift_point(std_x, std_y, self.K[0], self.K[1])
+        self.rA = self.rotation(d_rad, self.L[0], self.L[1], self.A[0], self.A[1])
+        self.rB = self.rotation(d_rad, self.L[0], self.L[1], self.B[0], self.B[1])
+        self.rC = self.rotation(d_rad, self.L[0], self.L[1], self.C[0], self.C[1])
+        self.rD = self.rotation(d_rad, self.L[0], self.L[1], self.D[0], self.D[1])
+        #self.rE = self.rotation(d_rad, self.I[0], self.I[1], self.E[0], self.E[1])
+        self.rF = self.rotation(d_rad, self.L[0], self.L[1], self.F[0], self.F[1])
+        self.rG = self.rotation(d_rad, self.L[0], self.L[1], self.G[0], self.G[1])
+        self.rH = self.rotation(d_rad, self.L[0], self.L[1], self.H[0], self.H[1])
+        self.rI = self.rotation(d_rad, self.L[0], self.L[1], self.I[0], self.I[1])
+        #self.rJ = self.rotation(d_rad, self.I[0], self.I[1], self.J[0], self.J[1])
+        self.rK = self.rotation(d_rad, self.L[0], self.L[1], self.K[0], self.K[1])
+
+        self.rL = self.rotation(d_rad, self.L[0], self.L[1], self.L[0], self.L[1])
+
+        std_x  = self.rC[0]
+        std_y  = self.rC[1]
+
+        self.rA = self.shift_point(std_x, std_y, self.rA[0], self.rA[1])
+        self.rB = self.shift_point(std_x, std_y, self.rB[0], self.rB[1])
+        self.rC = self.shift_point(std_x, std_y, self.rC[0], self.rC[1])
+        self.rD = self.shift_point(std_x, std_y, self.rD[0], self.rD[1])
+        #self.rE = self.shift_point(std_x, std_y, self.rE[0], self.rE[1])
+        self.rF = self.shift_point(std_x, std_y, self.rF[0], self.rF[1])
+        self.rG = self.shift_point(std_x, std_y, self.rG[0], self.rG[1])
+        self.rH = self.shift_point(std_x, std_y, self.rH[0], self.rH[1])
+        self.rI = self.shift_point(std_x, std_y, self.rI[0], self.rI[1])
+        #self.rJ = self.shift_point(std_x, std_y, self.rJ[0], self.rJ[1])
+        self.rK = self.shift_point(std_x, std_y, self.rK[0], self.rK[1])
+
+        self.rL = self.shift_point(std_x, std_y, self.rL[0], self.rL[1])
 
 
     def rotation(self, d_rad:float, Cx:float, Cy:float, x:float, y:float):

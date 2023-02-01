@@ -23,10 +23,10 @@ def link_machine():
     # Z平面の位置
 #    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.04, k=0.036, angle_phi=60, angle_delta=0)
 #    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.025313, k=0.025313, angle_phi=60, angle_delta=0)
-    four_bar = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.025313, k=0.03, angle_phi=60, angle_delta=0)
+    four_bar = FourBarLinkage(a=0.025313, b=0.08, g=0.010, j=0.025313, k=0.01, angle_phi=60, angle_delta=0)
     four_bar.update_positions()
 
-    four_bar2 = FourBarLinkage(a=0.025313, b=0.04050137, e=0.025313, g=0.010, j=0.04, k=0.036, angle_phi=60, angle_delta=0, offset = 300)
+    four_bar2 = FourBarLinkage(a=0.025313, b=0.04050137, g=0.010, j=0.04, k=0.036, angle_phi=60, angle_delta=0, offset = 300)
     four_bar2.update_positions()
 
     cv2.namedWindow('panel')
@@ -34,6 +34,7 @@ def link_machine():
     cv2.createTrackbar('phi', 'panel', 90, 360, lambda x: None)
     cv2.createTrackbar('delta', 'panel', 210, 360, lambda x: None)
     cv2.createTrackbar('gamma', 'panel', 120, 360, lambda x: None)
+    cv2.createTrackbar('epsilon', 'panel', 120, 360, lambda x: None)
     cv2.createTrackbar('Ex', 'panel', 100, 200, lambda x: None)
     cv2.createTrackbar('Ey', 'panel', 79, 100, lambda x: None)
 
@@ -68,9 +69,11 @@ def link_machine():
         elif mode == 3: # 手動で角度γ/角度δを操作（駆動軸で位置決定する）
             gamma = cv2.getTrackbarPos('gamma', 'panel')
             delta = cv2.getTrackbarPos('delta', 'panel')
+            epsilon = cv2.getTrackbarPos('epsilon', 'panel')
             phi = gamma - (delta-180)
             four_bar.set_phi(phi)
             four_bar.set_delta(delta)
+            four_bar.set_epsilon(epsilon)
 
         four_bar.update_positions()
         #four_bar.update_stand()
