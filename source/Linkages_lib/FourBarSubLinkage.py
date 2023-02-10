@@ -73,21 +73,38 @@ class FourBarSubLinkage:
         transformed_point: np.ndarray = self.T_E @ np.matrix([self.E_org[0], self.E_org[1], 1]).T
         self.E = np.array(transformed_point[:2].T)[0]                
 
+    def update_inverse_kinematics(self, x: float, y: float):
+        data:float
+        a_cos:float
+        a_tan:float
 
-    # A, B 二点の直線延長上に B から l の距離にある点を計算する
-    def point_on_extension(self, A, B, l):
-        A = np.array(A)
-        B = np.array(B)
-        AB = B - A
-        AB_unit = AB / np.linalg.norm(AB)
-        return B + l * AB_unit
+        # δを計算--------
+        try:
+        #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+            data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+        except ZeroDivisionError:
+            print(x,y)
+            return
 
-    def point_on_extension_by_angle_AB(self, A, B, angle, l):
-        AB = np.array(B) - np.array(A)
-        AB = AB / np.linalg.norm(AB)
-        R = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-        unit_vector = np.dot(AB, R)
-        return B + l * unit_vector
+        if data > 1 or data < -1:
+            return
+        # ---------------
+
+        a_cos = math.acos(data)
+        a_tan = math.atan2(y,x)
+
+        # マイナス側を採用
+        delta_p =  a_cos + a_tan
+        delta_m = -a_cos + a_tan
+
+        self.set_delta(math.degrees(delta_m))
+
+        # Φを計算
+        a_tan_phi:float
+        a_tan_phi = math.atan2((y - self.a * math.sin(self.delta)) , (x - self.a * math.cos(self.delta)))
+        angle_phi = math.degrees(a_tan_phi) - self.angle_delta
+
+        self.set_phi(angle_phi)
 
 
 if __name__ == '__main__':

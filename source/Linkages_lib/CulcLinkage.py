@@ -68,3 +68,19 @@ def intersection_point(c1: tuple, r1: float, c2: tuple, r2: float, point: tuple)
             return xs1, ys1
         else:
             return xs2, ys2
+
+# A, B 二点の直線延長上に B から l の距離にある点を計算する
+def point_on_extension(self, A, B, l):
+    A = np.array(A)
+    B = np.array(B)
+    AB = B - A
+    AB_unit = AB / np.linalg.norm(AB)
+    return B + l * AB_unit
+
+def point_on_extension_by_angle_AB(self, A, B, angle, l):
+    AB = np.array(B) - np.array(A)
+    AB = AB / np.linalg.norm(AB)
+    R = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    unit_vector = np.dot(AB, R)
+    return B + l * unit_vector
+
