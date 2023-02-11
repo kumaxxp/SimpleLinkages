@@ -80,8 +80,9 @@ class FourBarSubLinkage:
 
         # δを計算--------
         try:
-        #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b + self.e) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
-            data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+            data = (x ** 2 + y ** 2 + (self.a + self.l1) ** 2 - (self.b + self.e) ** 2) / (2 * (self.a + self.l1) * math.sqrt(x**2 + y**2))
+        #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
+            print('data', data)
         except ZeroDivisionError:
             print(x,y)
             return
@@ -97,14 +98,20 @@ class FourBarSubLinkage:
         delta_p =  a_cos + a_tan
         delta_m = -a_cos + a_tan
 
-        self.set_delta(math.degrees(delta_m))
+        delta = math.degrees(delta_m)
+        if delta < 0:
+            delta = delta + 360.0
+
+        print('delta', delta)
 
         # Φを計算
         a_tan_phi:float
-        a_tan_phi = math.atan2((y - self.a * math.sin(self.delta)) , (x - self.a * math.cos(self.delta)))
-        angle_phi = math.degrees(a_tan_phi) - self.angle_delta
+        a_tan_phi = math.atan2((y - self.a * math.sin(delta)) , (x - self.a * math.cos(delta)))
 
-        self.set_phi(angle_phi)
+        print('phi', math.degrees(a_tan_phi))
+#        angle_phi = math.degrees(a_tan_phi) - self.angle_delta
+
+#        self.set_phi(angle_phi)
 
 
 if __name__ == '__main__':

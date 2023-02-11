@@ -202,3 +202,14 @@ class linkage_2d_five:
         cv2.circle(image, center=pos_C_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_D_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
+        # 足先点Eの座標
+        pos = (pos_E_int[0]+30, pos_E_int[1])
+        cv2.putText(image, text = str(four_bar.E), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+        # B1,B2の角度Θ1/Θ2
+        pos = (pos_B1_int[0]+30, pos_B1_int[1])
+        cv2.putText(image, text = str(five_bar.theta1), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+        pos = (pos_B2_int[0]+30, pos_B2_int[1])
+        cv2.putText(image, text = str(five_bar.theta2), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
