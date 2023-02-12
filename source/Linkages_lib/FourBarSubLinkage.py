@@ -75,7 +75,7 @@ class FourBarSubLinkage:
         transformed_point: np.ndarray = self.T_E @ np.matrix([self.E_org[0], self.E_org[1], 1]).T
         self.E = np.array(transformed_point[:2].T)[0]                
 
-    def update_inverse_kinematics(self, x: float, y: float):
+    def update_inverse_kinematics_debug(self, x: float, y: float):
         l = self.l1 + self.a + self.e
         theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, self.b, l)
 
@@ -115,51 +115,17 @@ class FourBarSubLinkage:
         transformed_point: np.ndarray = T_G_m @ np.matrix([Em_org[0], Em_org[1], 1]).T
         self.Eim = np.array(transformed_point[:2].T)[0]
 
-
-    def update_inverse_kinematics_b(self, x: float, y: float):
-
+    def update_inverse_kinematics(self, x: float, y: float):
         l = self.l1 + self.a + self.e
-        theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, l, self.b)
+        theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, self.b, l)
 
-        #print('inv ', theta1_p, theta1_m, theta2_p, theta2_m)
-
-        self.theta1 = theta1_p
-        self.phi = theta2_p
+        self.theta1_p = theta1_p
+        self.phi_p = theta2_p
 
         self.theta1_m = theta1_m
         self.phi_m = theta2_m
 
-        # 点M1 または、点Aを計算する
-        A_org: Tuple[float, float] = (self.B1[0] + self.l1, self.B1[1])
-        F_org: Tuple[float, float] = (self.B1[0] + l, self.B1[1])
-
-        # theta1の回転行列
-        T_B1 = lculc.culc_rotate_mat(self.B1, self.theta1)
-
-        transformed_point: np.ndarray = T_B1 @ np.matrix([A_org[0], A_org[1], 1]).T
-        self.M1i = np.array(transformed_point[:2].T)[0]                
-
-        transformed_point: np.ndarray = T_B1 @ np.matrix([F_org[0], F_org[1], 1]).T
-        self.Fi = np.array(transformed_point[:2].T)[0]
-
-        # theta1_mの回転行列
-        T_B1_m = lculc.culc_rotate_mat(self.B1, self.theta1_m)
-
-        transformed_point: np.ndarray = T_B1_m @ np.matrix([F_org[0], F_org[1], 1]).T
-        self.Fi_m = np.array(transformed_point[:2].T)[0]
-
-        # phiの回転行列
-        E_org: Tuple[float, float] = (self.Fi[0] + self.b, self.Fi[1])
-        T_F = lculc.culc_rotate_mat(self.Fi, self.phi)
-        E_m_org: Tuple[float, float] = (self.Fi_m[0] + self.b, self.Fi_m[1])
-        T_F_m = lculc.culc_rotate_mat(self.Fi_m, self.phi_m)
-        transformed_point: np.ndarray = T_F @ np.matrix([E_org[0], E_org[1], 1]).T
-        self.Ei = np.array(transformed_point[:2].T)[0]                
-
-        transformed_point: np.ndarray = T_F_m @ np.matrix([E_m_org[0], E_m_org[1], 1]).T
-        self.Ei_m = np.array(transformed_point[:2].T)[0]                
-
-        # これ以後は、5節リンク側のM1,Xを計算する
+        #print(x, y, self.theta1, self.phi,self.theta1_m, self.phi_m)
 
 
 if __name__ == '__main__':
