@@ -38,8 +38,8 @@ def link_machine():
         four_bar.set_theta(theta1)
         four_bar.update_positions()
 
-        four_bar.update_inverse_kinematics(four_bar.E[0], four_bar.E[1])
-        five_bar.update_inverse_kinematics(four_bar.theta1, four_bar.phi, four_bar.M1)
+        four_bar.update_inverse_kinematics(four_bar.E[0]-five_bar.B1[0], four_bar.E[1]-five_bar.B1[1])
+        five_bar.update_inverse_kinematics(four_bar.theta1_m, four_bar.phi_m)
         
         cv_2dview.draw(five_bar, four_bar)
 

@@ -65,64 +65,40 @@ class FiveBarLinkage:
         self.calculate_coordinates(theta1=theta1, theta2=theta2)
 
 
-    def update_inverse_kinematics(self, theta1: float, phi: float, M1):
-        # 平行リンク部分から逆運動学で計算した角度、theta1,phiと、M1の座標からXの座標を割り出し、
+    def update_inverse_kinematics(self, theta1: float, phi: float):
+        # 平行リンク部分から逆運動学で計算した角度、theta1,phiと、B1の座標からXの座標を割り出し、
         # Xの座標から逆運動学でtheta2を計算する
-        X_org: Tuple[float, float] = (self.M1[0] + self.m2, self.M1[1])
+        B1_org: Tuple[float, float] = (self.B1[0] + self.l1, self.B1[1])
+        T_X = lculc.culc_rotate_mat(self.B1, phi)
+        transformed_point: np.ndarray = T_X @ np.matrix([B1_org[0], B1_org[1], 1]).T
+        self.M1i = np.array(transformed_point[:2].T)[0]
 
-        T_X = lculc.culc_rotate_mat(M1, phi)
-        transformed_point: np.ndarray = T_X @ np.matrix([X_org[0], X_org[1], 1]).T
-        Xi = np.array(transformed_point[:2].T)[0]
+        M1_org: Tuple[float, float] = (self.M1i[0] + self.m1, self.M1i[1])
+        T_X = lculc.culc_rotate_mat(self.M1, theta1)
+        transformed_point: np.ndarray = T_X @ np.matrix([M1_org[0], M1_org[1], 1]).T
+        self.Xi = np.array(transformed_point[:2].T)[0]
+
+        x,y = self.Xi - self.B2
 
         # Xの位置から逆運動学でB2の角度を計算する
-        data:float
-        a_cos:float
-        a_tan:float
-        x:float
-        y:float
+        theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, self.l2, self.m2)
 
-        x,y = Xi
-        self.Xi = Xi
-        #print(Xi)
+        self.theta2i = theta1_m
+        self.phi_i = theta2_m
 
-        # δを計算--------
-        try:
-            data = (x ** 2 + y ** 2 + self.l2 ** 2 - self.m1 ** 2) / (2 * self.l2 * math.sqrt(x**2 + y**2))
-        #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
-        #    print('data', data)
-        except ZeroDivisionError:
-            print('data-except', data)
-            print(x,y)
-            return
+        # print(theta1_p, theta1_m, theta2_p, theta2_m)
 
-        if data > 1 or data < -1:
-            return
-        # ---------------
+        # Θ2=0のときの点M2の座標(l2,0)
+        M2_org: Tuple[float, float] = (self.B2[0] + self.l2, self.B2[1])
+        T_B2 = lculc.culc_rotate_mat(self.B2, self.theta2i)
+        transformed_point: np.ndarray = T_B2 @ np.matrix([M2_org[0], M2_org[1], 1]).T
+        self.M2i = np.array(transformed_point[:2].T)[0]
 
-        a_cos = math.acos(data)
-        a_tan = math.atan2(y,x)
-
-        # マイナス側を採用
-        delta_p =  a_cos + a_tan
-        delta_m = -a_cos + a_tan
-
-        delta = math.degrees(delta_p)
-        if delta < 0:
-            delta = delta + 360.0
-
-        #print('delta', delta)
-
-        # Φを計算
-        a_tan_phi:float
-        a_tan_phi = math.atan2((y - self.l2 * math.sin(delta)) , (x - self.l2 * math.cos(delta)))
-        phi = math.degrees(a_tan_phi)
-        if phi < 0:
-            phi = phi + 360.0
-
-        #print('phi', phi)
-
-
-
+        # Xiの座標を計算する
+        X_org: Tuple[float, float] = (self.M2i[0] + self.l2, self.M2i[1])
+        T_X = lculc.culc_rotate_mat(self.M2i, self.phi_i)
+        transformed_point: np.ndarray = T_X @ np.matrix([X_org[0], X_org[1], 1]).T
+        self.XXi = np.array(transformed_point[:2].T)[0]
 
 
 

@@ -85,7 +85,7 @@ def point_on_extension_by_angle_AB(self, A, B, angle, l):
     return B + l * unit_vector
 
 # 精度の高い逆運動学の計算を行う
-def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:
+def improved_function_back(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:
 
     # Θ1を計算
     numerator = np.square(x) + np.square(y) + np.square(l1) - np.square(l2)
@@ -103,10 +103,56 @@ def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, 
     theta1_m = np.degrees(theta_m_rad)
 
     # Θ2を計算
-    a_tan_phi_p_rad = np.arctan2(y - l1 * np.sin(np.radians(theta1_p)), x - l1 * np.cos(np.radians(theta1_p)))
-    a_tan_phi_m_rad = np.arctan2(y - l1 * np.sin(np.radians(theta1_m)), x - l1 * np.cos(np.radians(theta1_m)))
+    a_tan_phi_p_rad = np.arctan(y - l1 * np.sin(theta_p_rad) /(x - l1 * np.cos(theta_p_rad)))
+    a_tan_phi_m_rad = np.arctan(y - l1 * np.sin(theta_m_rad) /(x - l1 * np.cos(theta_m_rad)))
 
     theta2_p = np.degrees(a_tan_phi_p_rad)
     theta2_m = np.degrees(a_tan_phi_m_rad)
+#    theta2_m = 0
 
     return theta1_p, theta1_m, theta2_p, theta2_m
+
+
+# 精度の高い逆運動学の計算を行う
+def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:
+
+    # Θ1を計算
+    numerator = np.square(x) + np.square(y) + np.square(l1) - np.square(l2)
+    denominator = 2 * l1 * np.sqrt(np.square(x) + np.square(y))
+    if denominator == 0:
+        return None
+
+    delta_rad = np.arccos(numerator / denominator)
+    a_tan_rad = np.arctan2(y,x)
+
+    theta_rad = a_tan_rad + delta_rad
+    theta_rad_m = a_tan_rad - delta_rad
+
+    theta1_p = np.degrees(theta_rad)
+    theta1_m = np.degrees(theta_rad_m)
+
+    # Θ2を計算    
+    numerator   = y - l1*np.sin(theta_rad)
+    denominator = x - l1*np.cos(theta_rad)
+    theta2_rad = np.arctan(numerator / denominator)
+    theta2_p = np.degrees(theta2_rad)
+
+    numerator   = y - l1*np.sin(theta_rad_m)
+    denominator = x - l1*np.cos(theta_rad_m)
+    theta2_rad = np.arctan(numerator / denominator)
+    theta2_m = np.degrees(theta2_rad)
+
+    return theta1_p, theta1_m, theta2_p, theta2_m
+
+if __name__ == '__main__':
+
+    # X,Y =  (0.004719464217149496 -0.10051644671340068) - (0.01007, -0.010)
+    # a,b,e,l1 = 0.02, 0.050, 0.044, 0.015
+    # (l1 ,l2) = (b, a+e+l1) = (0.05, 0.079)
+    # -36.69498038837119 63.400837262331414 -137.92864690663993 -58.02446455734254
+    theta1_p, theta1_m, theta2_p, theta2_m = improved_function(0.004719464217149496-0.01007, -0.10051644671340068+0.010, 0.05, 0.079)
+
+    print(theta1_p, theta2_p, theta1_m, theta2_m)
+
+    # 原点を考慮するの忘れてないか？
+    # Eからの逆算は、B1を引く必要がある。
