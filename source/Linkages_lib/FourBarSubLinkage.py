@@ -26,6 +26,8 @@ class FourBarSubLinkage:
         self.E : Tuple[float, float] = (0, 0)
 
         self.theta1 : float = 0.0
+        self.phi : float = 0.0
+
 
     def set_points(self, B1: Tuple[float, float], M1: Tuple[float, float], X: Tuple[float, float]):
         self.B1 = B1
@@ -80,11 +82,12 @@ class FourBarSubLinkage:
 
         # δを計算--------
         try:
-            data = (x ** 2 + y ** 2 + (self.a + self.l1) ** 2 - (self.b + self.e) ** 2) / (2 * (self.a + self.l1) * math.sqrt(x**2 + y**2))
+            l = self.l1 + self.a + self.e
+            data = (x ** 2 + y ** 2 + l ** 2 - self.b ** 2) / (2 * l * math.sqrt(x**2 + y**2))
         #    data = (x ** 2 + y ** 2 + self.a ** 2 - (self.b) ** 2) / (2 * self.a * math.sqrt(x**2 + y**2))
-            print('data', data)
+        #    print('data', data)
         except ZeroDivisionError:
-            print(x,y)
+            #print(x,y)
             return
 
         if data > 1 or data < -1:
@@ -98,7 +101,8 @@ class FourBarSubLinkage:
         delta_p =  a_cos + a_tan
         delta_m = -a_cos + a_tan
 
-        delta = math.degrees(delta_m)
+        delta_rad = delta_p
+        delta = math.degrees(delta_rad)
         if delta < 0:
             delta = delta + 360.0
 
@@ -106,12 +110,35 @@ class FourBarSubLinkage:
 
         # Φを計算
         a_tan_phi:float
-        a_tan_phi = math.atan2((y - self.a * math.sin(delta)) , (x - self.a * math.cos(delta)))
+        a_tan_phi = math.atan2((y - l * math.sin(delta_rad)) , (x - l * math.cos(delta_rad)))
+        phi = math.degrees(a_tan_phi)
+        if phi < 0:
+            phi = phi + 360.0
 
-        print('phi', math.degrees(a_tan_phi))
-#        angle_phi = math.degrees(a_tan_phi) - self.angle_delta
+        self.theta1 = delta
+        self.phi = phi
+        print('phi', phi)
 
-#        self.set_phi(angle_phi)
+        # 点M1 または、点Aを計算する
+        A_org: Tuple[float, float] = (self.B1[0] + self.l1, self.B1[1])
+        F_org: Tuple[float, float] = (self.B1[0] + l, self.B1[1])
+
+        # theta1の回転行列
+        T_B1 = lculc.culc_rotate_mat(self.B1, self.theta1)
+
+        transformed_point: np.ndarray = T_B1 @ np.matrix([A_org[0], A_org[1], 1]).T
+        self.M1i = np.array(transformed_point[:2].T)[0]                
+
+        transformed_point: np.ndarray = T_B1 @ np.matrix([F_org[0], F_org[1], 1]).T
+        self.Fi = np.array(transformed_point[:2].T)[0]                
+
+        # phiの回転行列
+        E_org: Tuple[float, float] = (self.Fi[0] + self.b, self.Fi[1])
+        T_F = lculc.culc_rotate_mat(self.Fi, phi)
+        transformed_point: np.ndarray = T_F @ np.matrix([E_org[0], E_org[1], 1]).T
+        self.Ei = np.array(transformed_point[:2].T)[0]                
+
+        # これ以後は、5節リンク側のM1,Xを計算する
 
 
 if __name__ == '__main__':

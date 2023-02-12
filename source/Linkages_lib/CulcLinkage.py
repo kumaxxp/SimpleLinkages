@@ -84,3 +84,29 @@ def point_on_extension_by_angle_AB(self, A, B, angle, l):
     unit_vector = np.dot(AB, R)
     return B + l * unit_vector
 
+# 精度の高い逆運動学の計算を行う
+def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:
+
+    # Θ1を計算
+    numerator = np.square(x) + np.square(y) + np.square(l1) - np.square(l2)
+    denominator = 2 * l1 * np.sqrt(np.square(x) + np.square(y))
+    if denominator == 0:
+        return None
+
+    delta_rad = np.arccos(numerator / denominator)
+    a_tan_rad = np.arctan2(y,x)
+
+    theta_p_rad =  delta_rad + a_tan_rad
+    theta_m_rad = -delta_rad + a_tan_rad
+
+    theta1_p = np.degrees(theta_p_rad)
+    theta1_m = np.degrees(theta_m_rad)
+
+    # Θ2を計算
+    a_tan_phi_p_rad = np.arctan2(y - l1 * np.sin(np.radians(theta1_p)), x - l1 * np.cos(np.radians(theta1_p)))
+    a_tan_phi_m_rad = np.arctan2(y - l1 * np.sin(np.radians(theta1_m)), x - l1 * np.cos(np.radians(theta1_m)))
+
+    theta2_p = np.degrees(a_tan_phi_p_rad)
+    theta2_m = np.degrees(a_tan_phi_m_rad)
+
+    return theta1_p, theta1_m, theta2_p, theta2_m
