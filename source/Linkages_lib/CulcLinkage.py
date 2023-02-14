@@ -163,6 +163,19 @@ def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, 
 
     return theta1_p, theta1_m, theta2_p, theta2_m
 
+# 楕円軌道を作る。カウンタは外から入れる。
+def culc_ellipse(t:float) -> tuple:
+
+        a = 0.03
+        b = 0.01
+        
+        r = -math.pi * (1/1000)*(t) *5
+        x = a * math.cos(r)
+        y = b * math.sin(r) - 0.10
+
+        return x,y
+
+
 if __name__ == '__main__':
 
     # X,Y =  (0.004719464217149496 -0.10051644671340068) - (0.01007, -0.010)

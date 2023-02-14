@@ -150,9 +150,9 @@ class linkage_2d_five:
         pos_D_int = self._convert_coordinate(four_bar.D)
         pos_E_int = self._convert_coordinate(four_bar.E)
 
-        pos_Ei_int = self._convert_coordinate(four_bar.Ei)
+#        pos_Ei_int = self._convert_coordinate(four_bar.Ei)
         pos_Gi_int = self._convert_coordinate(four_bar.Gi)
-        pos_Ei_m_int = self._convert_coordinate(four_bar.Eim)
+#        pos_Ei_m_int = self._convert_coordinate(four_bar.Eim)
         pos_Gi_m_int = self._convert_coordinate(four_bar.Gim)
     
 #        pos_M1i_int = self._convert_coordinate(five_bar.M1i)
@@ -180,9 +180,9 @@ class linkage_2d_five:
 
     #   逆変換のデバッグのために線を表示する
         cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_Gi_m_int, pt2=pos_Ei_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+    #    cv2.line(image, pt1=pos_Gi_m_int, pt2=pos_Ei_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_Gi_int, pt2=pos_Ei_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+    #    cv2.line(image, pt1=pos_Gi_int, pt2=pos_Ei_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
     
     #    cv2.line(image, pt1=pos_M1i_int, pt2=pos_Xi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
     #    cv2.line(image, pt1=pos_M2i_int, pt2=pos_B2_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
