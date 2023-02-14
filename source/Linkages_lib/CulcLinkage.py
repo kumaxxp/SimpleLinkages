@@ -112,6 +112,25 @@ def improved_function_back(x: float, y: float, l1: float, l2: float) -> Tuple[fl
 
     return theta1_p, theta1_m, theta2_p, theta2_m
 
+# 原点ピンを中心に、リンクを回転させて、次のピンの位置を計算する
+def culc_next_point(O:Tuple[float,float], l:float, delta: float) -> Tuple[float,float]:
+    # O:原点ピンの位置
+    # l:リンクの長さ
+    # delta:原点ピンを中心にリンクを回転させる角度
+
+    # 点Pの角度0度の座標
+    P_org: Tuple[float, float] = (O[0] + l, O[1])
+
+    print('culc', O, l, delta)
+
+    # theta1の回転行列
+    T_O = culc_rotate_mat(O, delta)
+    transformed_point: np.ndarray = T_O @ np.matrix([P_org[0], P_org[1], 1]).T
+    P = np.array(transformed_point[:2].T)[0]
+    print('culd', P)
+
+    return P
+
 
 # 精度の高い逆運動学の計算を行う
 def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:

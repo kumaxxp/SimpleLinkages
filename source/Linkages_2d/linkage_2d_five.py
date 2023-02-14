@@ -150,16 +150,16 @@ class linkage_2d_five:
         pos_D_int = self._convert_coordinate(four_bar.D)
         pos_E_int = self._convert_coordinate(four_bar.E)
 
-    #    pos_Ei_int = self._convert_coordinate(four_bar.Ei)
-    #    pos_Gi_int = self._convert_coordinate(four_bar.Gi)
-    #    pos_Ei_m_int = self._convert_coordinate(four_bar.Eim)
-    #    pos_Gi_m_int = self._convert_coordinate(four_bar.Gim)
-    #
-    #    pos_M1i_int = self._convert_coordinate(five_bar.M1i)
-    #    pos_Xi_int = self._convert_coordinate(five_bar.Xi)
+        pos_Ei_int = self._convert_coordinate(four_bar.Ei)
+        pos_Gi_int = self._convert_coordinate(four_bar.Gi)
+        pos_Ei_m_int = self._convert_coordinate(four_bar.Eim)
+        pos_Gi_m_int = self._convert_coordinate(four_bar.Gim)
+    
+#        pos_M1i_int = self._convert_coordinate(five_bar.M1i)
+#        pos_Xi_int = self._convert_coordinate(five_bar.Xi)
 
-    #    pos_M2i_int = self._convert_coordinate(five_bar.M2i)
-    #    pos_XXi_int = self._convert_coordinate(five_bar.XXi)
+#        pos_M2i_int = self._convert_coordinate(five_bar.M2i)
+#        pos_XXi_int = self._convert_coordinate(five_bar.XXi)
 
         # cv2の座標系に回転角を変換する
         # 角度は±反転し、反時計回りで塗りつぶせるように、
@@ -179,11 +179,11 @@ class linkage_2d_five:
         cv2.line(image, pt1=pos_E_int, pt2=pos_B_int, color=LINK_COLOR_B, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
     #   逆変換のデバッグのために線を表示する
-    #    cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-    #    cv2.line(image, pt1=pos_Gi_m_int, pt2=pos_Ei_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-    #    cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-    #    cv2.line(image, pt1=pos_Gi_int, pt2=pos_Ei_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
-    #
+        cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_Gi_m_int, pt2=pos_Ei_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_Gi_int, pt2=pos_Ei_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
+    
     #    cv2.line(image, pt1=pos_M1i_int, pt2=pos_Xi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
     #    cv2.line(image, pt1=pos_M2i_int, pt2=pos_B2_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
     #    cv2.line(image, pt1=pos_M2i_int, pt2=pos_XXi_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
@@ -211,6 +211,8 @@ class linkage_2d_five:
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
         cv2.putText(img = image, text = 'E', org = pos_E_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
             fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        cv2.putText(img = image, text = 'Gi', org = pos_Gi_int, fontFace=cv2.FONT_HERSHEY_PLAIN, 
+            fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
         cv2.circle(image, center=pos_B1_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_B2_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
@@ -230,12 +232,15 @@ class linkage_2d_five:
         pos = (pos_X_int[0]+30, pos_X_int[1])
         cv2.putText(image, text = str(four_bar.X), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
-        # B1,B2の角度Θ1/Θ2
-        pos = (pos_B1_int[0]+30, pos_B1_int[1])
-        cv2.putText(image, text = str(five_bar.theta1), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        pos = (pos_Gi_int[0]+30, pos_Gi_int[1])
+        cv2.putText(image, text = str(four_bar.Gi), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
-        pos = (pos_B2_int[0]+30, pos_B2_int[1])
-        cv2.putText(image, text = str(five_bar.theta2), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+        # B1,B2の角度Θ1/Θ2
+#        pos = (pos_B1_int[0]+30, pos_B1_int[1])
+#        cv2.putText(image, text = str(five_bar.theta1), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+#        pos = (pos_B2_int[0]+30, pos_B2_int[1])
+#        cv2.putText(image, text = str(five_bar.theta2), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
     #    pos = (pos_Xi_int[0]+30, pos_Xi_int[1])
     #    cv2.putText(image, text = str(five_bar.Xi), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
