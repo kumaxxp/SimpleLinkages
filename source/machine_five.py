@@ -23,12 +23,12 @@ def link_machine():
     B2: tuple(float,float) = (-0.01007, -0.010)
     l1:float = 0.015
     l2:float = 0.025
-    m1:float = 0.03
-    m2:float = 0.03
+    m1:float = 0.040
+    m2:float = 0.025
 
     a:float = 0.02
-    b:float = 0.05
-    e:float = 0.044
+    b:float = 0.050
+    e:float = 0.040
 
     five_bar = FiveBarLinkage(B1, B2, [l1, l2, m1, m2])
     four_bar = FourBarSubLinkage(B1, a, b, e, l1, m1)
@@ -48,7 +48,7 @@ def link_machine():
         if mode == 0:   # 自動で逆運動で楕円に動く
             x_in,y_in = lculc.culc_ellipse(t)
             t=t+1
-            print(x_in, y_in)
+            #print(x_in, y_in)
 
             four_bar.update_inverse_kinematics(x_in-five_bar.B1[0], y_in-five_bar.B1[1])
             five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1)
@@ -64,7 +64,7 @@ def link_machine():
             y_in = -0.001 * y
            
             #x,y = 0.00471946, -0.10051645
-            print(x_in, y_in)
+            #print(x_in, y_in)
 
             four_bar.update_inverse_kinematics(x_in-five_bar.B1[0], y_in-five_bar.B1[1])
             five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1)

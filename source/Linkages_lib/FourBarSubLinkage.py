@@ -27,9 +27,15 @@ class FourBarSubLinkage:
         self.C : Tuple[float, float] = (0, 0)
         self.D : Tuple[float, float] = (0, 0)
         self.E : Tuple[float, float] = (0, 0)
+        self.H : Tuple[float, float] = (0, 0)
+        self.I : Tuple[float, float] = (0, 0)
 
         self.theta1 : float = 0.0
         self.phi : float = 0.0
+        self.delta1 : float = -60.0
+        self.delta2 : float = 60.0
+
+        self.h : float = 0.010
 
     def set_points(self, M1: Tuple[float, float], X: Tuple[float, float]):
         self.M1 = M1
@@ -41,6 +47,7 @@ class FourBarSubLinkage:
 
     def set_theta(self, theta1 : float):
         self.theta1 = theta1
+        print(theta1)
 
     def update_positions(self):
 
@@ -74,6 +81,9 @@ class FourBarSubLinkage:
         transformed_point: np.ndarray = self.T_E @ np.matrix([self.E_org[0], self.E_org[1], 1]).T
         self.E = np.array(transformed_point[:2].T)[0]                
 
+        self.H = lculc.culc_next_point(self.E, self.h, self.delta1+self.theta1)
+        self.I = lculc.culc_next_point(self.E, self.h, self.delta2+self.theta1)
+
     def update_inverse_kinematics(self, x: float, y: float):
         # 逆運動学で角度を計算
         l = self.l1 + self.a + self.e
@@ -92,15 +102,15 @@ class FourBarSubLinkage:
         self.Eim = lculc.culc_next_point(self.Gim, l, self.phi2_m)
 
         # B1 の角度はΘで確定
-        self.set_theta(self.phi2_m)
+        self.theta1 = self.phi2_m
+        self.angle_AB = self.phi1_m
+
         # M1の角度が逆運動学で確定している(self.phi1_m)
 
         # M1の座標を計算
         self.M1 = lculc.culc_next_point(self.B1, self.l1, self.theta1)
         # Xの座標を計算
-        self.X = lculc.culc_next_point(self.M1, self.m1, self.phi1_m)
-
-        self.angle_AB = self.phi1_m
+        self.X = lculc.culc_next_point(self.M1, self.m1, self.angle_AB)
 
         self.A = lculc.culc_next_point(self.B1, self.l1, self.theta1)
         self.D = lculc.culc_next_point(self.A, self.a, self.theta1)
@@ -111,51 +121,12 @@ class FourBarSubLinkage:
 
         self.E = lculc.culc_next_point(self.C, self.e, self.theta1)
 
+        self.H = lculc.culc_next_point(self.E, self.h, self.delta1+self.theta1)
+        self.I = lculc.culc_next_point(self.E, self.h, self.delta2+self.theta1)
 
-    def update_inverse_kinematics_b(self, x: float, y: float):
+        print(theta1_p, theta2_p, theta1_m, theta2_m, self.D)
 
-        l = self.l1 + self.a + self.e
-        theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, l, self.b)
 
-        #print('inv ', theta1_p, theta1_m, theta2_p, theta2_m)
-
-        self.theta1 = theta1_p
-        self.phi = theta2_p
-
-        self.theta1_m = theta1_m
-        self.phi_m = theta2_m
-
-        # 点M1 または、点Aを計算する
-        A_org: Tuple[float, float] = (self.B1[0] + self.l1, self.B1[1])
-        F_org: Tuple[float, float] = (self.B1[0] + l, self.B1[1])
-
-        # theta1の回転行列
-        T_B1 = lculc.culc_rotate_mat(self.B1, self.theta1)
-
-        transformed_point: np.ndarray = T_B1 @ np.matrix([A_org[0], A_org[1], 1]).T
-        self.M1i = np.array(transformed_point[:2].T)[0]                
-
-        transformed_point: np.ndarray = T_B1 @ np.matrix([F_org[0], F_org[1], 1]).T
-        self.Fi = np.array(transformed_point[:2].T)[0]
-
-        # theta1_mの回転行列
-        T_B1_m = lculc.culc_rotate_mat(self.B1, self.theta1_m)
-
-        transformed_point: np.ndarray = T_B1_m @ np.matrix([F_org[0], F_org[1], 1]).T
-        self.Fi_m = np.array(transformed_point[:2].T)[0]
-
-        # phiの回転行列
-        E_org: Tuple[float, float] = (self.Fi[0] + self.b, self.Fi[1])
-        T_F = lculc.culc_rotate_mat(self.Fi, self.phi)
-        E_m_org: Tuple[float, float] = (self.Fi_m[0] + self.b, self.Fi_m[1])
-        T_F_m = lculc.culc_rotate_mat(self.Fi_m, self.phi_m)
-        transformed_point: np.ndarray = T_F @ np.matrix([E_org[0], E_org[1], 1]).T
-        self.Ei = np.array(transformed_point[:2].T)[0]                
-
-        transformed_point: np.ndarray = T_F_m @ np.matrix([E_m_org[0], E_m_org[1], 1]).T
-        self.Ei_m = np.array(transformed_point[:2].T)[0]                
-
-        # これ以後は、5節リンク側のM1,Xを計算する
 
 
 if __name__ == '__main__':

@@ -84,33 +84,6 @@ def point_on_extension_by_angle_AB(self, A, B, angle, l):
     unit_vector = np.dot(AB, R)
     return B + l * unit_vector
 
-# 精度の高い逆運動学の計算を行う
-def improved_function_back(x: float, y: float, l1: float, l2: float) -> Tuple[float, float, float, float]:
-
-    # Θ1を計算
-    numerator = np.square(x) + np.square(y) + np.square(l1) - np.square(l2)
-    denominator = 2 * l1 * np.sqrt(np.square(x) + np.square(y))
-    if denominator == 0:
-        return None
-
-    delta_rad = np.arccos(numerator / denominator)
-    a_tan_rad = np.arctan2(y,x)
-
-    theta_p_rad =  delta_rad + a_tan_rad
-    theta_m_rad = -delta_rad + a_tan_rad
-
-    theta1_p = np.degrees(theta_p_rad)
-    theta1_m = np.degrees(theta_m_rad)
-
-    # Θ2を計算
-    a_tan_phi_p_rad = np.arctan(y - l1 * np.sin(theta_p_rad) /(x - l1 * np.cos(theta_p_rad)))
-    a_tan_phi_m_rad = np.arctan(y - l1 * np.sin(theta_m_rad) /(x - l1 * np.cos(theta_m_rad)))
-
-    theta2_p = np.degrees(a_tan_phi_p_rad)
-    theta2_m = np.degrees(a_tan_phi_m_rad)
-#    theta2_m = 0
-
-    return theta1_p, theta1_m, theta2_p, theta2_m
 
 # 原点ピンを中心に、リンクを回転させて、次のピンの位置を計算する
 def culc_next_point(O:Tuple[float,float], l:float, delta: float) -> Tuple[float,float]:
@@ -121,13 +94,13 @@ def culc_next_point(O:Tuple[float,float], l:float, delta: float) -> Tuple[float,
     # 点Pの角度0度の座標
     P_org: Tuple[float, float] = (O[0] + l, O[1])
 
-    print('culc', O, l, delta)
+    #print('culc', O, l, delta)
 
     # theta1の回転行列
     T_O = culc_rotate_mat(O, delta)
     transformed_point: np.ndarray = T_O @ np.matrix([P_org[0], P_org[1], 1]).T
     P = np.array(transformed_point[:2].T)[0]
-    print('culd', P)
+    #print('culd', P)
 
     return P
 
@@ -138,10 +111,14 @@ def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, 
     # Θ1を計算
     numerator = np.square(x) + np.square(y) + np.square(l1) - np.square(l2)
     denominator = 2 * l1 * np.sqrt(np.square(x) + np.square(y))
-    if denominator == 0:
-        return None
 
-    delta_rad = np.arccos(numerator / denominator)
+    denominator = abs(denominator)
+
+    if denominator == 0:
+        delta_rad = np.pi/2
+    else:
+        delta_rad = np.arccos(numerator / denominator)
+        
     a_tan_rad = np.arctan2(y,x)
 
     theta_rad = a_tan_rad + delta_rad
@@ -152,14 +129,16 @@ def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, 
 
     # Θ2を計算    
     numerator   = y - l1*np.sin(theta_rad)
-    denominator = x - l1*np.cos(theta_rad)
+    denominator = abs(x - l1*np.cos(theta_rad))
     theta2_rad = np.arctan(numerator / denominator)
     theta2_p = np.degrees(theta2_rad)
 
     numerator   = y - l1*np.sin(theta_rad_m)
-    denominator = x - l1*np.cos(theta_rad_m)
+    denominator = abs(x - l1*np.cos(theta_rad_m))
     theta2_rad = np.arctan(numerator / denominator)
     theta2_m = np.degrees(theta2_rad)
+
+    print(numerator,denominator,l1)
 
     return theta1_p, theta1_m, theta2_p, theta2_m
 

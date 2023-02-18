@@ -19,7 +19,7 @@ LINK_WIDTH = 2
 LINK_COLOR_B = (255, 0, 0)
 LINK_COLOR_G = (0, 255, 0)
 
-PIN_RADIUS = 30
+PIN_RADIUS = 15
 PIN_RADIUS_PHI = 20
 PIN_COLOR = (100, 100, 100)
 PIN_COLOR_ARC = (255, 100, 100)
@@ -31,6 +31,8 @@ PIN_WIDTH = 1
 CENTER_RADIUS = 50
 CENTER_COLOR = (100, 100, 100)
 CENTER_COLOR_ARC = (240, 220, 220)
+
+MOTOR_RADIUS = 30
 
 G_RADIUS = 15
 G_COLOR = (0, 0, 200)
@@ -150,6 +152,9 @@ class linkage_2d_five:
         pos_D_int = self._convert_coordinate(four_bar.D)
         pos_E_int = self._convert_coordinate(four_bar.E)
 
+        pos_H_int = self._convert_coordinate(four_bar.H)
+        pos_I_int = self._convert_coordinate(four_bar.I)
+
 #        pos_Ei_int = self._convert_coordinate(four_bar.Ei)
         pos_Gi_int = self._convert_coordinate(four_bar.Gi)
 #        pos_Ei_m_int = self._convert_coordinate(four_bar.Eim)
@@ -177,6 +182,9 @@ class linkage_2d_five:
         cv2.line(image, pt1=pos_C_int, pt2=pos_D_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_E_int, pt2=pos_B_int, color=LINK_COLOR_B, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+
+        cv2.line(image, pt1=pos_E_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(image, pt1=pos_E_int, pt2=pos_I_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
     #   逆変換のデバッグのために線を表示する
         cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)
@@ -216,6 +224,8 @@ class linkage_2d_five:
 
         cv2.circle(image, center=pos_B1_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_B2_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.circle(image, center=pos_B1_int, radius=MOTOR_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
+        cv2.circle(image, center=pos_B2_int, radius=MOTOR_RADIUS, color=PIN_COLOR, thickness=1, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_M1_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_M2_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.circle(image, center=pos_X_int, radius=PIN_RADIUS, color=PIN_COLOR, thickness=PIN_WIDTH, lineType=cv2.LINE_AA, shift=0)
@@ -245,6 +255,10 @@ class linkage_2d_five:
     #    pos = (pos_Xi_int[0]+30, pos_Xi_int[1])
     #    cv2.putText(image, text = str(five_bar.Xi), org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
 
-        pos = (pos_B1_int[0], pos_B1_int[1]+50)
-        txt = str(four_bar.theta1) + str(four_bar.phi)
+        pos = (pos_B1_int[0], pos_B1_int[1]-50)
+        txt = str(five_bar.theta1) 
+        cv2.putText(image, text = txt, org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
+
+        pos = (pos_B2_int[0]-50, pos_B2_int[1]-70)
+        txt = str(five_bar.theta2)
         cv2.putText(image, text = txt, org = pos, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1.0, color=PIN_TEXT, thickness=1, lineType=cv2.LINE_AA)
