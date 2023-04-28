@@ -71,6 +71,8 @@ class FiveBarLinkage:
 
         # Xの位置から逆運動学でB2の角度を計算する
         theta1_p, theta1_m, theta2_p, theta2_m = lculc.improved_function(x, y, self.l2, self.m2)
+        if theta1_p == None:
+            return False
 
 #        print(theta1_p, theta1_m, theta2_p, theta2_m)
 
@@ -86,11 +88,15 @@ class FiveBarLinkage:
         self.M2i = np.array(transformed_point[:2].T)[0]
         self.M2 = self.M2i
 
+        
+
         # Xiの座標を計算する
         X_org: Tuple[float, float] = (self.M2i[0] + self.l2, self.M2i[1])
         T_X = lculc.culc_rotate_mat(self.M2i, self.phi_i)
         transformed_point: np.ndarray = T_X @ np.matrix([X_org[0], X_org[1], 1]).T
         self.XXi = np.array(transformed_point[:2].T)[0]
+
+        return True
 
 
 

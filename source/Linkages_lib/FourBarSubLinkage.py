@@ -47,7 +47,7 @@ class FourBarSubLinkage:
 
     def set_theta(self, theta1 : float):
         self.theta1 = theta1
-        print(theta1)
+        #print(theta1)
 
     def update_positions(self):
 
@@ -124,7 +124,7 @@ class FourBarSubLinkage:
         self.H = lculc.culc_next_point(self.E, self.h, self.delta1+self.theta1)
         self.I = lculc.culc_next_point(self.E, self.h, self.delta2+self.theta1)
 
-        print(theta1_p, theta2_p, theta1_m, theta2_m, self.D)
+        #print(theta1_p, theta2_p, theta1_m, theta2_m, self.D)
 
 
 

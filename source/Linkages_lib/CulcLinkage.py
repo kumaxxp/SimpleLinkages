@@ -138,19 +138,22 @@ def improved_function(x: float, y: float, l1: float, l2: float) -> Tuple[float, 
     theta2_rad = np.arctan(numerator / denominator)
     theta2_m = np.degrees(theta2_rad)
 
-    print(numerator,denominator,l1)
+    #print(numerator,denominator,l1)
+
+    if(numerator == np.nan or denominator == np.nan):
+        return None,None,None,None
 
     return theta1_p, theta1_m, theta2_p, theta2_m
 
 # 楕円軌道を作る。カウンタは外から入れる。
 def culc_ellipse(t:float) -> tuple:
 
-        a = 0.03
-        b = 0.01
+        a = 0.045
+        b = 0.020
         
         r = -math.pi * (1/1000)*(t) *5
-        x = a * math.cos(r)
-        y = b * math.sin(r) - 0.10
+        x = a * math.cos(r) + 0.00
+        y = b * math.sin(r) - 0.16  # 0.12
 
         return x,y
 

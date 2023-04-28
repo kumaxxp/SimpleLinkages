@@ -47,7 +47,7 @@ def create_mp4(in_dir, out_filename, fps=24):
 
 # 2D表示用クラス
 class linkage_2d_five:
-    def __init__(self, width:int = 1000, height:int = 600, rec:bool = False):
+    def __init__(self, width:int = 1000, height:int = 700, rec:bool = False):
 
         # dirフォルダが無い時に新規作成
         dir = './image/'
@@ -70,7 +70,7 @@ class linkage_2d_five:
         # 方眼のステップ（ピクセル）
         self.grid_step = 50
 
-    def draw(self, five_bar_front:FiveBarLinkage, four_bar:FourBarSubLinkage ):
+    def draw(self, five_bar_front:FiveBarLinkage, four_bar:FourBarSubLinkage, LeftTop, RightBottom):
         self.img = np.zeros((self.height, self.width, 3), np.uint8)
         self.img[:,:,:] = 255
 
@@ -83,6 +83,32 @@ class linkage_2d_five:
         for y in range(0, self.height, self.grid_step):
             cv2.line(self.img, (0, y), (self.width, y), self.axis_color, 1)    
         # ---------------------------------------------------------
+
+        # モーターを描画
+        x1 = LeftTop[0]
+        y1 = LeftTop[1]
+        x2 = RightBottom[0]
+        y2 = RightBottom[1]
+
+        PT11 = (x1,y1)
+        PT21 = (x2,y1)
+        PT12 = (x1,y2)
+        PT22 = (x2,y2)
+
+    #    cv2.line(self.img, PT11, PT21, self.axis_color, 1)
+    #    cv2.line(self.img, PT12, PT22, self.axis_color, 1)
+    #    cv2.line(self.img, PT11, PT12, self.axis_color, 1)
+    #    cv2.line(self.img, PT21, PT22, self.axis_color, 1)
+        pos_PT11_int = self._convert_coordinate(PT11)
+        pos_PT21_int = self._convert_coordinate(PT21)
+        pos_PT12_int = self._convert_coordinate(PT12)
+        pos_PT22_int = self._convert_coordinate(PT22)
+
+        cv2.line(self.img, pt1=pos_PT11_int, pt2=pos_PT21_int, color=LINK_COLOR_B, thickness=2, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(self.img, pt1=pos_PT12_int, pt2=pos_PT22_int, color=LINK_COLOR_B, thickness=2, lineType=cv2.LINE_AA, shift=0)
+
+        cv2.line(self.img, pt1=pos_PT11_int, pt2=pos_PT12_int, color=LINK_COLOR_B, thickness=2, lineType=cv2.LINE_AA, shift=0)
+        cv2.line(self.img, pt1=pos_PT21_int, pt2=pos_PT22_int, color=LINK_COLOR_B, thickness=2, lineType=cv2.LINE_AA, shift=0)
 
         # Z軸平面 0 に描画する
         self.draw_link(image = self.img, five_bar = five_bar_front, four_bar=four_bar)
@@ -110,9 +136,9 @@ class linkage_2d_five:
             self.create_mp4(dir, 'output.mp4', 24)
             self.shutil.rmtree(dir)
 
-    def _convert_coordinate(self, pos: tuple, offset_x: int = 350, offset_y: int = 50) -> tuple:
-        pos_int_x = int(pos[0]*1000*4) + offset_x
-        pos_int_y = -int(pos[1]*1000*4) + offset_y
+    def _convert_coordinate(self, pos: tuple, offset_x: int = 350, offset_y: int = 100) -> tuple:
+        pos_int_x = int(pos[0]*1000*3) + offset_x
+        pos_int_y = -int(pos[1]*1000*3) + offset_y
         pos_int = (pos_int_x, pos_int_y)
         return pos_int
 
@@ -183,8 +209,8 @@ class linkage_2d_five:
         cv2.line(image, pt1=pos_D_int, pt2=pos_A_int, color=LINK_COLOR_R, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
         cv2.line(image, pt1=pos_E_int, pt2=pos_B_int, color=LINK_COLOR_B, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
-        cv2.line(image, pt1=pos_E_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
-        cv2.line(image, pt1=pos_E_int, pt2=pos_I_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_E_int, pt2=pos_H_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
+        #cv2.line(image, pt1=pos_E_int, pt2=pos_I_int, color=LINK_COLOR, thickness=LINK_WIDTH, lineType=cv2.LINE_AA, shift=0)
 
     #   逆変換のデバッグのために線を表示する
         cv2.line(image, pt1=pos_B1_int, pt2=pos_Gi_m_int, color=LINK_COLOR_G, thickness=1, lineType=cv2.LINE_AA, shift=0)

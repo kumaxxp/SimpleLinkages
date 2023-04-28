@@ -19,19 +19,25 @@ def link_machine():
 
     cv_2dview = linkage_2d_five()
 
-    B1: tuple(float,float) = (0.01007, -0.010)
-    B2: tuple(float,float) = (-0.01007, -0.010)
-    l1:float = 0.015
-    l2:float = 0.025
-    m1:float = 0.040
-    m2:float = 0.025
+    diffM: float = 0.01
 
-    a:float = 0.02
-    b:float = 0.050
-    e:float = 0.040
+    B1: tuple(float,float) = (0.02010 , -diffM)
+    B2: tuple(float,float) = (-(0.02010), -diffM)
+    l1:float = 0.025
+    l2:float = 0.025
+    m1:float = 0.050
+    m2:float = 0.035    #0.025
+
+    a:float = 0.025
+    b:float = 0.080
+    e:float = 0.080
 
     five_bar = FiveBarLinkage(B1, B2, [l1, l2, m1, m2])
     four_bar = FourBarSubLinkage(B1, a, b, e, l1, m1)
+
+    # モーター左上、右下
+    MotorLT: tuple(float,float) = (-(diffM/2 + 0.02009),0.0195)
+    MotorRB: tuple(float,float) = ((diffM/2 + 0.02009),-0.0205)
 
     cv2.namedWindow('panel')
     cv2.createTrackbar('mode', 'panel', 0, 3, lambda x: None)
@@ -51,11 +57,11 @@ def link_machine():
             #print(x_in, y_in)
 
             four_bar.update_inverse_kinematics(x_in-five_bar.B1[0], y_in-five_bar.B1[1])
-            five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1)
+            if five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1) == True:
+                five_bar.set_theta(four_bar.phi2_m, five_bar.theta2i)
+                five_bar.update_positions()
 
-            five_bar.set_theta(four_bar.phi2_m, five_bar.theta2i)
-            five_bar.update_positions()
-
+                cv_2dview.draw(five_bar, four_bar, MotorLT, MotorRB)
 
         elif mode == 1: # 手動で逆運動で操作
             x = cv2.getTrackbarPos('x', 'panel')
@@ -66,11 +72,16 @@ def link_machine():
             #x,y = 0.00471946, -0.10051645
             #print(x_in, y_in)
 
-            four_bar.update_inverse_kinematics(x_in-five_bar.B1[0], y_in-five_bar.B1[1])
-            five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1)
+            try:
+                four_bar.update_inverse_kinematics(x_in-five_bar.B1[0], y_in-five_bar.B1[1])
+                if five_bar.update_inverse_kinematics(four_bar.X, four_bar.M1) == True:
+                    five_bar.set_theta(four_bar.phi2_m, five_bar.theta2i)
+                    five_bar.update_positions()
 
-            five_bar.set_theta(four_bar.phi2_m, five_bar.theta2i)
-            five_bar.update_positions()
+                    cv_2dview.draw(five_bar, four_bar, MotorLT, MotorRB)
+
+            except ValueError as e:
+                print(e)
 
         elif mode == 2: # 手動で角度Φ/角度δを操作
             theta1 = cv2.getTrackbarPos('theta1', 'panel')
@@ -83,7 +94,9 @@ def link_machine():
             four_bar.set_theta(theta1)
             four_bar.update_positions()
 
-        cv_2dview.draw(five_bar, four_bar)
+            cv_2dview.draw(five_bar, four_bar, MotorLT, MotorRB)
+
+    #    cv_2dview.draw(five_bar, four_bar)
 
         if cv2.waitKey(1) == ord('q'):
             break
