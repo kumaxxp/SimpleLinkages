@@ -157,6 +157,39 @@ def culc_ellipse(t:float) -> tuple:
 
         return x,y
 
+import numpy as np
+
+class Linkage:
+    def __init__(self, l1, l2, l3, l4):
+        self.link_lengths = np.array([l1, l2, l3, l4])
+
+    def calculate_positions(self, theta1, theta4):
+        theta1_rad = np.radians(theta1)
+        theta4_rad = np.radians(180 - theta4)
+
+        rot_matrix1 = self.get_rot_matrix(theta1_rad)
+        rot_matrix4 = self.get_rot_matrix(theta4_rad)
+
+        p1 = np.dot(rot_matrix1, [self.link_lengths[0], 0])
+        p5 = np.dot(rot_matrix4, [-self.link_lengths[3], 0]) + [self.link_lengths[1], 0]
+
+        p3_conn_vec = self.link_lengths[2] * (p5 - p1) / np.linalg.norm(p5 - p1)
+        p2_conn_vec = (self.link_lengths[1] ** 2 - self.link_lengths[2] ** 2 + np.linalg.norm(p5 - p1) ** 2) / (2 * np.linalg.norm(p5 - p1)) * (p5 - p1) / np.linalg.norm(p5 - p1)
+
+        rot_theta2 = np.arccos((self.link_lengths[1] ** 2 + np.linalg.norm(p5 - p1) ** 2 - self.link_lengths[2] ** 2) / (2 * self.link_lengths[1] * np.linalg.norm(p5 - p1))) - np.arctan2((p5 - p1)[1], (p5 - p1)[0]) + np.arctan2(p1[1], p1[0])
+
+        rot_matrix2 = self.get_rot_matrix(rot_theta2)
+
+        p2 = np.dot(rot_matrix2, [self.link_lengths[1], 0])
+        p3 = p1 + p3_conn_vec
+
+        return p1, p2, p3, p5
+
+    def get_rot_matrix(self, theta):
+        return np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+
+
+
 
 if __name__ == '__main__':
 
@@ -170,3 +203,14 @@ if __name__ == '__main__':
 
     # 原点を考慮するの忘れてないか？
     # Eからの逆算は、B1を引く必要がある。
+
+    # Genie
+    # 使用例
+    linkage = Linkage(1, 2, 3, 4)
+    p1, p2, p3, p5 = linkage.calculate_positions(30, 120)
+
+    print("P1:", p1)
+    print("P2:", p2)
+    print("P3:", p3)
+    print("P5:", p5)
+
