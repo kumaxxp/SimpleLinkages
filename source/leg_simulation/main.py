@@ -62,8 +62,6 @@ if __name__ == "__main__":
     endeffector_position = leg.compute_endeffector_position(theta_1, theta_2)
     print("エンドエフェクタの位置:", endeffector_position)
 
-    positions = leg.get_positions()
-
     # Pygame 初期化
     pygame.init()
 
@@ -78,9 +76,6 @@ if __name__ == "__main__":
     font = pygame.font.Font(None, 24)  # フォントオブジェクトの生成（デフォルトフォント、サイズ24）
     origin = (screen_width // 2, screen_height // 2)  # 画面の中心を原点座標とします。
 
-    # 辞書内の座標を変換
-    transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
-
     # リンクのリスト
     link_list = {
         ('A', 'B'),
@@ -94,9 +89,6 @@ if __name__ == "__main__":
         ('M2', 'X'),
         ('M1', 'X')}
 
-    # 座標からリンクのリストを生成
-    links_coordinates = create_links(link_list, transformed_coordinates)
-
     # 描画ループ
     running = True
     while running:
@@ -105,6 +97,16 @@ if __name__ == "__main__":
                 running = False
                 break
 
+
+        # -----脚の座標取得-----
+        # 脚の頂点位置を取得
+        positions = leg.get_positions()
+        # 脚の頂点のリストを表示用に座標変換
+        transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
+        # 座標からリンクのリストを生成
+        links_coordinates = create_links(link_list, transformed_coordinates)
+
+        # -----描画処理------
         screen.fill((0, 0, 0))  # 画面を黒色でクリア
 
         # X=0, Y=0 の線を引く
