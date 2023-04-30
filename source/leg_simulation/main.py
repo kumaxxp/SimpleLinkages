@@ -1,5 +1,9 @@
 import sys
 import pygame
+from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+
 import math
 import threading
 
@@ -54,12 +58,20 @@ if __name__ == "__main__":
         'e': 0.040
     }
 
-    leg = Leg(linkage5bar_params, linkage4bar_params)
-    theta_1 = math.radians(-45)
-    theta_2 = math.radians(-115)
+    # リンクのリスト
+    link_list = {
+        ('A', 'B'),
+        ('B', 'C'),
+        ('C', 'D'),
+        ('D', 'A'),
+        ('C', 'E'),
+        ('B1', 'B2'),
+        ('B1', 'M1'),
+        ('B2', 'M2'),
+        ('M2', 'X'),
+        ('M1', 'X')}
 
-    endeffector_position = leg.compute_endeffector_position(theta_1, theta_2)
-    print("エンドエフェクタの位置:", endeffector_position)
+    leg = Leg(linkage5bar_params, linkage4bar_params)
 
     # Pygame 初期化
     pygame.init()
@@ -74,19 +86,6 @@ if __name__ == "__main__":
     # 初期設定の追加
     font = pygame.font.Font(None, 24)  # フォントオブジェクトの生成（デフォルトフォント、サイズ24）
     origin = (screen_width // 2, screen_height // 2)  # 画面の中心を原点座標とします。
-
-    # リンクのリスト
-    link_list = {
-        ('A', 'B'),
-        ('B', 'C'),
-        ('C', 'D'),
-        ('D', 'A'),
-        ('C', 'E'),
-        ('B1', 'B2'),
-        ('B1', 'M1'),
-        ('B2', 'M2'),
-        ('M2', 'X'),
-        ('M1', 'X')}
 
     # 描画ループ
     running = True
