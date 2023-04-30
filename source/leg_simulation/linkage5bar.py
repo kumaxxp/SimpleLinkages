@@ -65,16 +65,11 @@ class Linkage5Bar:
 
         X1, X2 = intersection_points
 
-        print(X1)
-        print(X2)
-
         # Choose the intersection point with smaller Y coordinate as the final X point
         if X1[1] < X2[1]:
             X_x, X_y = X1
         else:
             X_x, X_y = X2
-
-        print(X_x,X_y)
 
         # Save all positions and angles in the Positions member variable
         self.Positions = {

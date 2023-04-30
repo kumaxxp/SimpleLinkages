@@ -16,7 +16,6 @@ def slider_change(value):
     theta_1 = math.radians(float(scale_theta_1.get()))
     theta_2 = math.radians(float(scale_theta_2.get()))
     endeffector_position = leg.compute_endeffector_position(theta_1, theta_2)
-    print("エンドエフェクタの位置:", endeffector_position)
 
 
 def run_gui():
@@ -24,11 +23,11 @@ def run_gui():
     gui = tk.Tk()
     gui.title("Theta Sliders")
     
-    scale_theta_1 = tk.Scale(gui, from_=-180, to=180, orient=tk.HORIZONTAL, command=slider_change)
+    scale_theta_1 = tk.Scale(gui, from_=-90, to=0, orient=tk.HORIZONTAL, command=slider_change, length=300)
     scale_theta_1.set(-45)
     scale_theta_1.pack()
     
-    scale_theta_2 = tk.Scale(gui, from_=-180, to=180, orient=tk.HORIZONTAL, command=slider_change)
+    scale_theta_2 = tk.Scale(gui, from_=-180, to=-90, orient=tk.HORIZONTAL, command=slider_change, length=300)
     scale_theta_2.set(-115)
     scale_theta_2.pack()
 
