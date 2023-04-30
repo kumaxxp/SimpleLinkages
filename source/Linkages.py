@@ -6,6 +6,8 @@ import numpy as np
 
 class Linkage5Bar:
     def __init__(self, initial_parameters):
+        self.Positions = {}
+
         self.B1 = np.array([initial_parameters['b'] / 2, 0])
         self.B2 = np.array([-initial_parameters['b'] / 2, 0])
 
@@ -46,6 +48,42 @@ class Linkage5Bar:
             # y座標が小さい頂点を選択します
             x_result = x1 if x1[1] < x2[1] else x2
             return x_result
+        
+    def compute_all_positions(self, theta_1, theta_2):
+        # Calculate vertex A
+        M1_x = self.B1[0] + self.a * np.cos(theta_1)
+        M1_y = self.B1[1] + self.a * np.sin(theta_1)
+
+        # Calculate vertex B
+        M2_x = self.B2[0] - self.b * np.cos(theta_2)
+        M2_y = self.B2[1] - self.b * np.sin(theta_2)
+
+        # Calculate vertex X
+        V1 = np.array([M1_x - self.B1[0], M1_y - self.B1[1]])
+        V2 = np.array([M2_x - M1_x, M2_y - M1_y])
+        cos_theta = np.dot(V1, V2) / (np.linalg.norm(V1) * np.linalg.norm(V2))
+        sin_theta = np.sqrt(1 - cos_theta**2)
+        d = self.c * sin_theta
+
+        if d > self.d:
+            return None
+
+        k = (self.d**2 - self.c**2 - d**2) / (2 * d)
+        h = np.sqrt(self.c**2 - k**2)
+
+        X_x = M1_x + (k / d) * (M2_x - M1_x) + (h / d) * (M2_y - M1_y)
+        X_y = M1_y - (h / d) * (M2_x - M1_x) + (k / d) * (M2_y - M1_y)
+
+        # Save all positions and angles in the Positions member variable
+        self.Positions = {
+            'M1': (M1_x, M1_y),
+            'M2': (M2_x, M2_y),
+            'X': (X_x, X_y),
+            'theta_1': theta_1,
+            'theta_2': theta_2
+        }
+
+        return self.Positions
 
     def forward_kinematics(self, theta_1, theta_2):
         x_M1 = np.array([self.l1 * np.cos(theta_1), self.l1 * np.sin(theta_1)])
@@ -67,6 +105,8 @@ class Linkage5Bar:
 
 class Linkage4Bar:
     def __init__(self, initial_parameters, linkage5bar_instance):
+        self.Positions = {}
+
         self.a = initial_parameters['a']
         self.b = initial_parameters['b']
 
@@ -84,6 +124,49 @@ class Linkage4Bar:
 
         return (A_x, A_y), (B_x, B_y), (C_x, C_y), (D_x, D_y)
     
+    def compute_all_positions(self, A):
+        A_x, A_y = A
+        a = np.linalg.norm(A - self.linkage5bar.B1)
+        b = np.linalg.norm(A - self.linkage5bar.B2)
+
+        # Update positions based on A
+        positions = self.update_positions()
+        B_x, B_y = positions[1]
+        C_x, C_y = positions[2]
+
+        # Compute angles
+        AB = np.array([B_x - A_x, B_y - A_y])
+        BC = np.array([C_x - B_x, C_y - B_y])
+
+        AD = np.array([self.linkage5bar.B2[0] - A_x, self.linkage5bar.B2[1] - A_y])
+        CD = np.array([C_x - self.linkage5bar.B2[0], C_y - self.linkage5bar.B2[1]])
+
+        costheta_A = np.dot(AB, BC) / (np.linalg.norm(AB) * np.linalg.norm(BC))
+        theta_A = np.arccos(costheta_A)
+
+        costheta_D = np.dot(AD, CD) / (np.linalg.norm(AD) * np.linalg.norm(CD))
+        theta_D = np.arccos(costheta_D)
+
+        # Use Gram's theorem to calculate the area of the parallelogram formed by A, B, C, and D
+        area_parallelogram = 0.5 * a * b * np.sin(theta_A + theta_D)
+
+        # Calculate E position using geometry concepts
+        E_x = (B_x + C_x) / 2
+        E_y = (A_y + area_parallelogram * 2) / (a + b)
+
+        # Save all positions and angles in the Positions member variable
+        self.Positions = {
+            'A': (A_x, A_y),
+            'B': (B_x, B_y),
+            'C': (C_x, C_y),
+            'D': self.linkage5bar.B2,
+            'E': (E_x, E_y),
+            'theta_1': theta_1,
+            'theta_2': theta_2
+        }        
+
+        return self.Positions
+    
 
 class Leg:
     def __init__(self, linkage5bar_params, linkage4bar_params):
@@ -91,12 +174,11 @@ class Leg:
         self.linkage4bar = Linkage4Bar(linkage4bar_params)
 
     def compute_endeffector_position(self, theta_1, theta_2):
-        X = self.linkage5bar.compute_vertex_X(theta_1, theta_2)
-        if X is None:
-            return None
+        self.linkage5bar.compute_all_positions(theta_1, theta_2)
+        X = np.array(self.linkage5bar.Positions['X'])
+        self.linkage4bar.compute_all_positions(X)
+        endeffector_position = self.linkage4bar.Positions['E']
 
-        A = X
-        endeffector_position = self.linkage4bar.compute_E_position(A)
         return endeffector_position
 
     def forward_kinematics(self, B1_angle: float, B2_angle: float) -> dict:
@@ -147,4 +229,3 @@ if __name__ == "__main__":
     endeffector_position = leg.compute_endeffector_position(theta_1, theta_2)
     print("エンドエフェクタの位置:", endeffector_position)
 
-    
