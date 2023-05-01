@@ -103,6 +103,20 @@ def main():
     glutMainLoop()
 
 def pygame_display(surface, pixels):
+    # Clear the surface (optional)
+    surface.fill((0, 0, 0))
+
+    # Draw a red rectangle
+    pygame.draw.rect(surface, (255, 0, 0), (50, 50, 100, 50))
+
+    # Draw a green circle
+    pygame.draw.circle(surface, (0, 255, 0), (200, 100), 25)
+
+    # Update the surface with the new 2D drawings
+    pygame.surfarray.blit_array(surface, pixels)
+    pygame.display.flip()
+
+def pygame_display_sub(surface, pixels):
     # -----脚の座標取得-----
     positions = leg.get_positions()
     transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
@@ -234,7 +248,7 @@ if __name__ == "__main__":
 
         # Swap axes if necessary (depending on your current code):
         pixels_swapped = pixels_rgb.swapaxes(0, 1)        
-        
+
         pygame_display(surface, pixels_swapped)
 
     # Pygame 終了
