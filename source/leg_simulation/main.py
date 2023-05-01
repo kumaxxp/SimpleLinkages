@@ -1,14 +1,16 @@
 import sys
 import pygame
 from pygame.locals import *
+from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 
 import math
 import threading
+import numpy as np
 
 from leg import Leg
-from utils import convert_coordinates, create_links
+from utils import convert_coordinates, create_links, create_links_2D
 
 import tkinter as tk
 
@@ -59,7 +61,11 @@ def draw_links(links_coordinates):
         glVertex3fv(link[1])
     glEnd()
 
-def display():
+def init():
+    glClearColor(0.0, 0.0, 0.0, 1.0)
+    glEnable(GL_DEPTH_TEST)
+
+def display_gl(surface):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
@@ -77,7 +83,7 @@ def display():
     draw_axis()
     draw_links(links_coordinates)
 
-    glutSwapBuffers()
+    pygame.display.flip()
 
 def init():
     glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -96,9 +102,68 @@ def main():
 
     glutMainLoop()
 
+def pygame_display(surface, pixels):
+    # -----脚の座標取得-----
+    positions = leg.get_positions()
+    transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
+    links_coordinates = create_links_2D(link_list, transformed_coordinates)
 
+    # -----描画処理------
+    surface.fill((0, 0, 0))
+
+    # -----脚の座標取得-----
+    # 脚の頂点位置を取得
+    positions = leg.get_positions()
+    # 脚の頂点のリストを表示用に座標変換
+    transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
+    # 座標からリンクのリストを生成
+    links_coordinates = create_links_2D(link_list, transformed_coordinates)
+
+    # -----描画処理------
+    surface.fill((0, 0, 0))  # 画面を黒色でクリア
+
+    # X=0, Y=0 の線を引く
+    pygame.draw.line(surface, (128, 128, 128), (0, origin[1]), (screen_width, origin[1]), 1)
+    pygame.draw.line(surface, (128, 128, 128), (origin[0], 0), (origin[0], screen_height), 1)
+
+    # 座標軸の目盛りとラベルを描画
+    marker_length = 10
+    text_offset = 15
+    for coord_val in range(-origin[0]//50*50, screen_width//2, 50):
+        # X 軸
+        pygame.draw.line(surface, (128, 128, 128), (origin[0] + coord_val, origin[1] - marker_length), (origin[0] + coord_val, origin[1] + marker_length))
+
+        # Y 軸
+        pygame.draw.line(surface, (128, 128, 128), (origin[0] - marker_length, origin[1] - coord_val), (origin[0] + marker_length, origin[1] - coord_val))
+
+    # 頂点を描画
+    for vertex_name, coord in transformed_coordinates.items():
+        pygame.draw.circle(surface, vertex_color, coord, 5)    
+
+        original_coord = positions[vertex_name] 
+        
+        if(vertex_name != 'A'):
+
+            # 座標をメートルからミリメートルに変換
+            original_coord_mm = (original_coord[0] * 1000, original_coord[1] * 1000)
+
+            # ラベル名と変換前の座標を結合して表示
+            label_text = f"{vertex_name} ({original_coord_mm[0]:.2f}, {original_coord_mm[1]:.2f})"
+            label = font.render(label_text, True, (255, 255, 255))
+            surface.blit(label, (coord[0] + 10, coord[1] - 10))
+
+    # リンクを描画
+    for link in links_coordinates:
+        pygame.draw.line(surface, (255, 255, 255), link[0], link[1], 2)
+
+    pygame.surfarray.blit_array(surface, pixels)
+    pygame.display.flip()  # 描画内容を画面に反映
 
 if __name__ == "__main__":
+    # Pygame 初期化
+    pygame.init()
+    # ウィンドウサイズ
+    display = (screen_width, screen_height)
 
     # Start the GUI in a separate thread
     gui_thread = threading.Thread(target=run_gui)
@@ -134,15 +199,12 @@ if __name__ == "__main__":
 
     leg = Leg(linkage5bar_params, linkage4bar_params)
 
-    main()
+    # 2D ウィンドウ
+    surface = pygame.Surface(display)
+    window_pos = (50, 50)  # ウィンドウ内での表示位置    
 
-    # Pygame 初期化
-    pygame.init()
-    display = (screen_width, screen_height)
-    screen = pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-    glTranslatef(0.0, 0.0, -5)
+    pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
+    init()
 
     # 色の定義
     vertex_color = (255, 0, 0)
@@ -160,63 +222,20 @@ if __name__ == "__main__":
                 running = False
                 break
 
-        glRotatef(1, 3, 1, 1)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glBegin(GL_QUADS)
-        glVertex3fv((1, 1, 0))
-        glVertex3fv((-1, 1, 0))
-        glVertex3fv((-1, -1, 0))
-        glVertex3fv((1, -1, 0))
-        glEnd()
-        pygame.display.flip()
-        pygame.time.wait(10) 
+        display_gl(surface)
         
-        # -----脚の座標取得-----
-        # 脚の頂点位置を取得
-        positions = leg.get_positions()
-        # 脚の頂点のリストを表示用に座標変換
-        transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
-        # 座標からリンクのリストを生成
-        links_coordinates = create_links(link_list, transformed_coordinates, 0.10)
+        # Get the rendered OpenGL framebuffer and convert it to Pygame surface format
+        buffer = glReadPixels(0, 0, screen_width, screen_height, GL_RGBA, GL_UNSIGNED_BYTE)
+        pixels = np.frombuffer(buffer, dtype=np.uint8).reshape(screen_height, screen_width, 4)
+        pixels = np.flipud(pixels)  # Flip the image vertically
 
-        # -----描画処理------
-        screen.fill((0, 0, 0))  # 画面を黒色でクリア
+        # Convert RGBA to RGB:
+        pixels_rgb = pixels[..., :3]
 
-        # X=0, Y=0 の線を引く
-        pygame.draw.line(screen, (128, 128, 128), (0, origin[1]), (screen_width, origin[1]), 1)
-        pygame.draw.line(screen, (128, 128, 128), (origin[0], 0), (origin[0], screen_height), 1)
-
-        # 座標軸の目盛りとラベルを描画
-        marker_length = 10
-        text_offset = 15
-        for coord_val in range(-origin[0]//50*50, screen_width//2, 50):
-            # X 軸
-            pygame.draw.line(screen, (128, 128, 128), (origin[0] + coord_val, origin[1] - marker_length), (origin[0] + coord_val, origin[1] + marker_length))
-
-            # Y 軸
-            pygame.draw.line(screen, (128, 128, 128), (origin[0] - marker_length, origin[1] - coord_val), (origin[0] + marker_length, origin[1] - coord_val))
-
-        # 頂点を描画
-        for vertex_name, coord in transformed_coordinates.items():
-            pygame.draw.circle(screen, vertex_color, coord, 5)    
-
-            original_coord = positions[vertex_name] 
-            
-            if(vertex_name != 'A'):
-
-                # 座標をメートルからミリメートルに変換
-                original_coord_mm = (original_coord[0] * 1000, original_coord[1] * 1000)
-
-                # ラベル名と変換前の座標を結合して表示
-                label_text = f"{vertex_name} ({original_coord_mm[0]:.2f}, {original_coord_mm[1]:.2f})"
-                label = font.render(label_text, True, (255, 255, 255))
-                screen.blit(label, (coord[0] + 10, coord[1] - 10))
-
-        # リンクを描画
-        for link in links_coordinates:
-            pygame.draw.line(screen, (255, 255, 255), link[0], link[1], 2)
-
-        pygame.display.flip()  # 描画内容を画面に反映
+        # Swap axes if necessary (depending on your current code):
+        pixels_swapped = pixels_rgb.swapaxes(0, 1)        
+        
+        pygame_display(surface, pixels_swapped)
 
     # Pygame 終了
     pygame.quit()

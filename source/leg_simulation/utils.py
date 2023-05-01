@@ -9,7 +9,7 @@ def convert_coordinates(coord, width, height):
     return x_transformed, y_transformed
 
 # 座標からリンクのリストを作成する
-def create_links(links, coordinates):
+def create_links_2D(links, coordinates):
     link_coordinates = []
     for vertex1, vertex2 in links:
         if vertex1 in coordinates and vertex2 in coordinates:
