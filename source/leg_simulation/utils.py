@@ -17,3 +17,13 @@ def create_links(links, coordinates):
             coord2 = coordinates[vertex2]
             link_coordinates.append((coord1, coord2))
     return link_coordinates
+
+# 座標からリンクのリストを作成する。三次元に拡張する
+def create_links(links, coordinates, t):
+    link_coordinates = []
+    for vertex1, vertex2 in links:
+        if vertex1 in coordinates and vertex2 in coordinates:
+            coord1 = coordinates[vertex1][0], coordinates[vertex1][1], t
+            coord2 = coordinates[vertex2][0], coordinates[vertex2][1], t
+            link_coordinates.append((coord1, coord2))
+    return link_coordinates

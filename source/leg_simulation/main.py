@@ -15,6 +15,7 @@ import tkinter as tk
 # 画面サイズ
 screen_width, screen_height = 1000, 800
 
+# GUIを処理するためのスレッドなど
 def slider_change(value):
     global theta_1, theta_2
     theta_1 = math.radians(float(scale_theta_1.get()))
@@ -36,6 +37,66 @@ def run_gui():
     scale_theta_2.pack()
 
     gui.mainloop()
+
+# OpenGLを使った画面表示系の関数など
+def draw_axis():
+    glColor3f(0.5, 0.5, 0.5)
+
+    glBegin(GL_LINES)
+    glVertex3f(-screen_width // 2, 0, 0)
+    glVertex3f(screen_width // 2, 0, 0)
+    glEnd()
+
+    glBegin(GL_LINES)
+    glVertex3f(0, -screen_height // 2, 0)
+    glVertex3f(0, screen_height // 2, 0)
+    glEnd()
+
+def draw_links(links_coordinates):
+    glBegin(GL_LINES)
+    for link in links_coordinates:
+        glVertex3fv(link[0])
+        glVertex3fv(link[1])
+    glEnd()
+
+def display():
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+
+    glScalef(0.001, 0.001, 0.001) # オブジェクトのスケール
+
+    # 脚の座標取得
+    positions = leg.get_positions()
+    
+    transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height)
+                               for key, coord in positions.items()}
+                               
+    links_coordinates = create_links(link_list, transformed_coordinates, 0.0)
+
+    # 描画処理
+    draw_axis()
+    draw_links(links_coordinates)
+
+    glutSwapBuffers()
+
+def init():
+    glClearColor(0.0, 0.0, 0.0, 1.0)
+    glEnable(GL_DEPTH_TEST)
+
+def main():
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
+    glutInitWindowSize(screen_width, screen_height)
+    glutCreateWindow("3D Line Example")
+
+    init()
+
+    glutDisplayFunc(display)
+    glutIdleFunc(glutPostRedisplay)
+
+    glutMainLoop()
+
+
 
 if __name__ == "__main__":
 
@@ -73,11 +134,15 @@ if __name__ == "__main__":
 
     leg = Leg(linkage5bar_params, linkage4bar_params)
 
+    main()
+
     # Pygame 初期化
     pygame.init()
+    display = (screen_width, screen_height)
+    screen = pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
 
-    # 画面設定
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    glTranslatef(0.0, 0.0, -5)
 
     # 色の定義
     vertex_color = (255, 0, 0)
@@ -95,14 +160,24 @@ if __name__ == "__main__":
                 running = False
                 break
 
-
+        glRotatef(1, 3, 1, 1)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glBegin(GL_QUADS)
+        glVertex3fv((1, 1, 0))
+        glVertex3fv((-1, 1, 0))
+        glVertex3fv((-1, -1, 0))
+        glVertex3fv((1, -1, 0))
+        glEnd()
+        pygame.display.flip()
+        pygame.time.wait(10) 
+        
         # -----脚の座標取得-----
         # 脚の頂点位置を取得
         positions = leg.get_positions()
         # 脚の頂点のリストを表示用に座標変換
         transformed_coordinates = {key: convert_coordinates(coord, screen_width, screen_height) for key, coord in positions.items()}
         # 座標からリンクのリストを生成
-        links_coordinates = create_links(link_list, transformed_coordinates)
+        links_coordinates = create_links(link_list, transformed_coordinates, 0.10)
 
         # -----描画処理------
         screen.fill((0, 0, 0))  # 画面を黒色でクリア
