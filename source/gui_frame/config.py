@@ -1,0 +1,7 @@
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 1000
+NEAR_CLIP_PLANE = 0.1
+FAR_CLIP_PLANE = 100.0
+
+global speed
+speed = 1.0
