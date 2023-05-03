@@ -1,5 +1,4 @@
 import tkinter as tk
-from manager_interface import ManagerInterface
 
 class GuiManager(tk.Tk):
     def __init__(self, shared_data):
@@ -16,8 +15,4 @@ class GuiManager(tk.Tk):
         self.shared_data.set_value("speed", float(value))
 
     def run(self):
-        root = tk.Tk()
-        slider = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL, command=self._on_slider_change)
-        slider.pack()
-
-        root.mainloop()
+        super().mainloop() # Change this line

@@ -3,7 +3,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_CLIP_PLANE, FAR_CLIP_PLANE
-from draw_functions import draw_2d_objects, draw_3d_objects
+from draw_functions import draw_3d_objects
 from utils import update_object_position
 from window_handlers import set_camera_position, keyboard_callback
 
