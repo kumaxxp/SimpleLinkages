@@ -19,3 +19,11 @@ project/
 5. `window_handlers.py`: PygameおよびOpenGLのウィンドウ処理とイベント処理を行う。
 6. `readme.md`: この文書
 
+
+data = {
+        "model": model_engine,
+        "messages"🙁
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt}
+        ],
+    }
