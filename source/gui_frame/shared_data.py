@@ -1,25 +1,23 @@
+# shared_data.py
+
 import threading
+from collections import deque
+from typing import Any, Deque, Dict, List, Tuple
 
 class SharedData:
-    def __init__(self):
-        self.values = {}
-        self.locks = {}
+    def __init__(self, queue_depth: int = 10):
+        self.data: Dict[str, Deque[Tuple[int, Any]]] = {}
+        self.queue_depth: int = queue_depth
+        self.lock: threading.Lock = threading.Lock()
 
-    def set_value(self, key, value):
-        if key not in self.locks:
-            self.locks[key] = threading.Lock()
+    def set_data(self, key: str, timestamp_ms: int, value: Any) -> None:
+        with self.lock:
+            if key not in self.data:
+                self.data[key] = deque(maxlen=self.queue_depth)
+            self.data[key].append((timestamp_ms, value))
 
-        with self.locks[key]:
-            self.values[key] = value
-    
-    def get_value(self, key):
-        lock = self.locks.get(key)
-        value = self.values.get(key, None)
+    def get_data(self, key: str) -> List[Tuple[int, Any]]:
+        with self.lock:
+            return list(self.data.get(key, []))
 
-        # 以前の値を使用 (ロックがかかっている場合は更新を待たずに取得)
-        if lock is not None and not lock.locked():
-            with lock:
-                value = self.values.get(key, None)
 
-        return value
-    
