@@ -470,3 +470,318 @@ class windows_handlers << (O, other_style) >> {
 ```
 
 このクラス図では、各関数がどのような引数を受け取り、どのような機能を持っているかをリストしています。これにより、プログラマはモジュールを実装する際に必要な情報が得られます。
+
+---
+
+>GuiManagerWithPlotの機能を表した詳細な仕様を説明してください。
+仕様を読んだプログラマがpythonで実装できるように書いてください。
+マークダウンでお願いします。
+また、GuiManagerWithPlotのクラス図をplantumlで詳細に書いて実装に役立てることができるようにしてください。
+以下、ソースコードです。
+
+---
+
+## GuiManagerWithPlotクラス仕様
+
+### 概要
+`GuiManagerWithPlot`クラスは、`GuiManager`クラスを継承し、GUIに時系列の速度グラフを表示する機能を追加したクラスです。MatplotlibとTkinterが使用されています。
+
+### 初期化関数 `__init__(self, shared_data)`
+- 引数：
+  - `shared_data`: SharedData オブジェクト
+- 機能：親クラスの `__init__` を呼び出し、Matplotlibのfigureとsubplotを初期化し、キャンバスを作成してウィンドウに配置します。時系列の速度グラフをプロットします。
+
+### plot_time_speed_graph(self)
+- 機能：共有データから `time` と `speed` のデータを取得し、時系列の速度グラフをプロットして画面上に表示します。
+
+### _on_slider_change(self, value)
+- 引数：
+  - `value`: スライダーから取得した新しい値
+- 機能：親クラスの `_on_slider_change` メソッドを呼び出し、共有データオブジェクト内のキー "speed" の値をスライダーの値に更新します。その後、時系列の速度グラフを更新します。
+
+以下は、`GuiManagerWithPlot` クラスの詳細なPlantUMLクラス図です:
+
+```plantuml
+@startuml
+
+!define main_style #FFD700
+!define other_style #98FB98
+
+class GuiManager << (O, other_style) >> {
+  -shared_data: SharedData
+  -scale: tk.Scale
+  +__init__(shared_data: SharedData)
+  +run(): None
+  -_on_slider_change(value: float): None
+}
+
+class GuiManagerWithPlot << (O, main_style) >> {
+  -figure: plt.Figure 
+  -plot: plt.Subplot
+  -canvas: FigureCanvasTkAgg
+  +__init__(shared_data: SharedData)
+  +plot_time_speed_graph(): None
+  -_on_slider_change(value: float): None
+}
+
+GuiManagerWithPlot --|> GuiManager
+GuiManager -- SharedData
+
+@enduml
+```
+
+このクラス図では、`GuiManagerWithPlot` クラスが `GuiManager` クラスを継承しており、主要なメソッドや属性がリストされています。これにより、プログラマはクラスを実装する際に必要な情報が得られます。
+
+>GuiManagerWithPlotクラスですが、スライダコントロールの値は、shared_dataに格納されるので、_on_slider_changeをオーバーライドする必要はありません。
+また、継承は構造がわかりにくくなるので、なるべく避けてください。
+
+おっしゃる通り、`_on_slider_change` メソッドのオーバーライドは不要です。また、継承ではなくコンポジションを使用した以下のような設計に変更します。
+
+### GuiManagerWithPlotクラス仕様 (修正版)
+
+#### 概要
+`GuiManagerWithPlot` クラスは、GUI に時系列の速度グラフを表示する機能を追加したクラスです。このクラスは、`GuiManager` を使っていますが、継承ではなくコンポジションを使用しています。Matplotlib と Tkinter が使用されています。
+
+#### 初期化関数 `__init__(self, shared_data)`
+- 引数：
+  - `shared_data`: SharedData オブジェクト
+- 機能：`GuiManager` クラスのインスタンスを作成し、初期化します。さらに、Matplotlib の figure と subplot を初期化し、キャンバスを作成してウィンドウに配置します。時系列の速度グラフをプロットします。
+
+```python
+class GuiManagerWithPlot:
+    def __init__(self, shared_data):
+        self.gui_manager = GuiManager(shared_data)
+        self.gui_manager.root.title("Gui with Time-Speed Graph")
+        
+        self.figure = plt.Figure(figsize=(5, 4), dpi=100)
+        self.plot = self.figure.add_subplot(1, 1, 1)
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.gui_manager.root)
+        
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        # スライダーのコールバック関数を変更
+        self.gui_manager.scale.config(command=self.plot_time_speed_graph)
+        self.plot_time_speed_graph()
+```
+
+#### plot_time_speed_graph(self, *args)
+- 機能：共有データから `time` と `speed` のデータを取得し、時系列の速度グラフをプロットして画面上に表示します。
+
+```python
+def plot_time_speed_graph(self, *args):
+    time_data = self.gui_manager.shared_data["time"]
+    speed_data = self.gui_manager.shared_data["speed"]
+
+    self.plot.clear()
+    self.plot.plot(time_data, speed_data, label="Speed vs Time")
+    self.plot.set_title("Time-Speed Graph")
+    self.plot.set_xlabel("Time")
+    self.plot.set_ylabel("Speed")
+    self.plot.legend()
+
+    self.canvas.draw()
+```
+
+以下は、`GuiManagerWithPlot` クラスの修正されたクラス図です：
+
+```plantuml
+@startuml
+
+!define main_style #FFD700
+!define other_style #98FB98
+
+class GuiManager << (O, other_style) >> {
+  -shared_data: SharedData
+  -scale: tk.Scale
+  +__init__(shared_data: SharedData)
+  +run(): None
+}
+
+class GuiManagerWithPlot << (O, main_style) >> {
+  -gui_manager: GuiManager
+  -figure: plt.Figure 
+  -plot: plt.Subplot
+  -canvas: FigureCanvasTkAgg
+  +__init__(shared_data: SharedData)
+  +plot_time_speed_graph(*args): None
+}
+
+GuiManagerWithPlot "1" *-- "1" GuiManager
+GuiManager -- SharedData
+
+@enduml
+```
+
+このクラス図で、`GuiManagerWithPlot` クラスは `GuiManager` クラスのインスタンスを持っており、主要なメソッドや属性がリストされています。これにより、プログラマはクラスを実装する際に必要な情報が得られます。
+
+
+`GuiManager` の機能を拡張するのではなく、時系列の速度グラフを表示する機能が追加された独自の GUI を実装しているため、`TimeSpeedGraphGui` というクラス名に変更します。以下は修正した仕様です。
+
+### TimeSpeedGraphGui クラス仕様 (修正版)
+
+#### 概要
+`TimeSpeedGraphGui` クラスは、GUI に時系列の速度グラフを表示する機能を実現したクラスです。このクラスは、`GuiManager` を使っていますが、継承ではなくコンポジションを使用しています。Matplotlib と Tkinter が使用されています。
+
+#### 初期化関数 `__init__(self, shared_data)`
+- 引数：
+  - `shared_data`: SharedData オブジェクト
+- 機能：`GuiManager` クラスのインスタンスを作成し、初期化します。さらに、Matplotlib の figure と subplot を初期化し、キャンバスを作成してウィンドウに配置します。時系列の速度グラフをプロットします。
+
+```python
+class TimeSpeedGraphGui:
+    def __init__(self, shared_data):
+        self.gui_manager = GuiManager(shared_data)
+        self.gui_manager.root.title("Time-Speed Graph")
+        
+        self.figure = plt.Figure(figsize=(5, 4), dpi=100)
+        self.plot = self.figure.add_subplot(1, 1, 1)
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.gui_manager.root)
+        
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        # スライダーのコールバック関数を変更
+        self.gui_manager.scale.config(command=self.plot_time_speed_graph)
+        self.plot_time_speed_graph()
+```
+
+#### plot_time_speed_graph(self, *args)
+- 機能：共有データから `time` と `speed` のデータを取得し、時系列の速度グラフをプロットして画面上に表示します。
+
+```python
+def plot_time_speed_graph(self, *args):
+    time_data = self.gui_manager.shared_data["time"]
+    speed_data = self.gui_manager.shared_data["speed"]
+
+    self.plot.clear()
+    self.plot.plot(time_data, speed_data, label="Speed vs Time")
+    self.plot.set_title("Time-Speed Graph")
+    self.plot.set_xlabel("Time")
+    self.plot.set_ylabel("Speed")
+    self.plot.legend()
+
+    self.canvas.draw()
+```
+
+以下は、`TimeSpeedGraphGui` クラスの修正されたクラス図です：
+
+```plantuml
+@startuml
+
+!define main_style #FFD700
+!define other_style #98FB98
+
+class GuiManager << (O, other_style) >> {
+  -shared_data: SharedData
+  -scale: tk.Scale
+  +__init__(shared_data: SharedData)
+  +run(): None
+}
+
+class TimeSpeedGraphGui << (O, main_style) >> {
+  -gui_manager: GuiManager
+  -figure: plt.Figure 
+  -plot: plt.Subplot
+  -canvas: FigureCanvasTkAgg
+  +__init__(shared_data: SharedData)
+  +plot_time_speed_graph(*args): None
+}
+
+TimeSpeedGraphGui "1" *-- "1" GuiManager
+GuiManager -- SharedData
+
+@enduml
+```
+
+このクラス図では、`TimeSpeedGraphGui` クラスが `GuiManager` クラスのインスタンスを持っており、主要なメソッドや属性がリストされています。これにより、プログラマはクラスを実装する際に必要な情報が得られます。
+
+---
+
+>クラス図を見て検討しましたが、GuiManagerが試作実装であまり機能が実装されていないため、無理に使用しなくてもソースコードをコピーし、GraphGuiクラスとして単独のクラスとして実装するべきだと考えます。
+おそらく、GuiManagerクラスは使わなくなると思われますし、都度、コールバック関数をオーバーライドして書き換える必要がなくなります。
+この仕様変更に合わせて仕様書やクラス図を変更してください。
+
+---
+
+`GraphGui` クラスとして単独のクラスを実装する仕様変更に合わせて、以下が修正された仕様です。
+
+### GraphGui クラス仕様 (修正版)
+
+#### 概要
+`GraphGui` クラスは、時系列の速度グラフを表示する機能を実現したクラスです。このクラスでは、Matplotlib と Tkinter が使用されています。
+
+#### 初期化関数 `__init__(self, shared_data)`
+- 引数：
+  - `shared_data`: SharedData オブジェクト
+- 機能：ウィンドウのタイトルを設定し、初期化します。さらに、Matplotlib の figure と subplot を初期化し、キャンバスを作成してウィンドウに配置します。時系列の速度グラフをプロットします。
+
+```python
+class GraphGui:
+    def __init__(self, shared_data):
+        self.shared_data = shared_data
+        self.root = tk.Tk()
+        self.root.title("Time-Speed Graph")
+        
+        self.figure = plt.Figure(figsize=(5, 4), dpi=100)
+        self.plot = self.figure.add_subplot(1, 1, 1)
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
+        
+        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        # スライダーのコールバック関数を変更
+        self.scale = tk.Scale(self.root, from_=0, to=100, orient=tk.HORIZONTAL, command=self.plot_time_speed_graph)
+        self.scale.pack(fill=tk.X, expand=True)
+
+        self.plot_time_speed_graph()
+```
+
+#### plot_time_speed_graph(self, *args)
+- 機能：共有データから `time` と `speed` のデータを取得し、時系列の速度グラフをプロットして画面上に表示します。
+
+```python
+def plot_time_speed_graph(self, *args):
+    time_data = self.shared_data["time"]
+    speed_data = self.shared_data["speed"]
+
+    self.plot.clear()
+    self.plot.plot(time_data, speed_data, label="Speed vs Time")
+    self.plot.set_title("Time-Speed Graph")
+    self.plot.set_xlabel("Time")
+    self.plot.set_ylabel("Speed")
+    self.plot.legend()
+
+    self.canvas.draw()
+```
+
+#### run(self)
+- 機能：Tkinter イベントループを開始します。
+
+```python
+def run(self):
+    self.root.mainloop()
+```
+
+以下は、`GraphGui` クラスの修正されたクラス図です：
+
+```plantuml
+@startuml
+
+!define main_style #FFD700
+
+class GraphGui << (O, main_style) >> {
+  -shared_data: SharedData
+  -root: tk.Tk
+  -figure: plt.Figure 
+  -plot: plt.Subplot
+  -canvas: FigureCanvasTkAgg
+  -scale: tk.Scale
+  +__init__(shared_data: SharedData)
+  +plot_time_speed_graph(*args): None
+  +run(): None
+}
+
+GraphGui -- SharedData
+
+@enduml
+```
+
+このクラス図では、`GraphGui` クラスが `SharedData` クラスとの関連を持っており、主要なメソッドや属性がリストされています。これにより、プログラマはクラスを実装する際に必要な情報が得られます。
