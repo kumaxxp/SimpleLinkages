@@ -20,14 +20,6 @@ project/
 6. `readme.md`: この文書
 
 
-data = {
-        "model": model_engine,
-        "messages"🙁
-            {"role": "system", "content": system},
-            {"role": "user", "content": prompt}
-        ],
-    }
-
 -------
 
 main.py - エントリーポイントとしてプログラムを実行
