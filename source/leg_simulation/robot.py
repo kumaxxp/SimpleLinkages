@@ -3,6 +3,10 @@
 import math
 import numpy as np
 
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+
 import pygame
 import sys
 
@@ -109,18 +113,57 @@ class Robot:
         for link in links_coordinates:
             pygame.draw.line(screen, (0, 255, 0), link[0], link[1], 2)
 
-if __name__ == "__main__":
+    def init_3d_view(self):
+        gluPerspective(45, (self.screen_width / self.screen_height), 0.1, 50.0)
+        glTranslatef(0.0, 0.0, -5)
 
+    def draw_3d_objects(self, object_position):
+        # 頂点
+        # オブジェクトの色を固定値に設定
+        glColor3f(1.0, 0.0, 0.0)
+
+        glPushMatrix()
+        glTranslatef(*object_position)
+
+        # glutSolidCube を使用してオブジェクトを描画
+        glutSolidCube(1.0)
+
+        glPopMatrix()
+        glBegin(GL_POINTS)
+
+        # object_position を使用して頂点を描画
+        glVertex3f(*object_position)
+        glEnd()
+
+        # リンク
+        glColor(0.0, 1.0, 0.0)
+        glBegin(GL_LINES)
+        glVertex3f(0, 0, 0)
+        glVertex3f(1, 1, 1)
+        glEnd()
+
+
+if __name__ == "__main__":
+    # OpenGL Utility Toolkit(GLUT)の初期化
+    glutInit(sys.argv)
+    
     robot = Robot()
 
     theta_1 = math.radians(-45)
     theta_2 = math.radians(-115)
 
+    # このフラグをTrueにすると3D表示になり、Falseにすると2D表示になります
+    use_3d_view = True
+
     # Pygame 初期化
     pygame.init()
 
     # 画面設定
-    screen = pygame.display.set_mode((robot.screen_width, robot.screen_height))
+    if use_3d_view:
+        screen = pygame.display.set_mode((robot.screen_width, robot.screen_height), pygame.DOUBLEBUF | pygame.OPENGL)
+        robot.init_3d_view()  # 3Dビューの初期化をメソッドで行う
+    else:
+        screen = pygame.display.set_mode((robot.screen_width, robot.screen_height))
 
     # 初期設定の追加
     font = pygame.font.Font(None, 24)
@@ -133,9 +176,18 @@ if __name__ == "__main__":
                 running = False
                 break
 
-        robot.draw_2d(screen, font, theta_1, theta_2)  # この関数を呼び出すだけで2D表示が可能になります
+        if use_3d_view:
+            glRotatef(1, 3, 1, 1)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        pygame.display.flip()
+            robot.draw_3d_objects((0, 0, 0))  # この関数を呼び出すだけで3D表示が可能になります
+
+            pygame.display.flip()
+            pygame.time.wait(10)
+        else:
+            robot.draw_2d(screen, font, theta_1, theta_2)  # この関数を呼び出すだけで2D表示が可能になります
+            
+            pygame.display.flip()
 
     # Pygame 終了
     pygame.quit()
