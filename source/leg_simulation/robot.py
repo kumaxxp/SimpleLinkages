@@ -47,6 +47,10 @@ class Robot:
         x_transformed = int((x * self.scale_factor) + self.screen_width // 2)
         y_transformed = int((-y * self.scale_factor) + self.screen_height // 2)
         return x_transformed, y_transformed
+    
+    def convert_length(self, len):
+        transformed = int(len * self.scale_factor)
+        return transformed
 
     def create_links(self, links, coordinates):
         link_coordinates = []
@@ -66,9 +70,27 @@ class Robot:
         links_coordinates = self.create_links(self.link_list, transformed_coordinates)
 
         # ここから、pygameを使った2D表示を行います
-        origin = (self.screen_width // 2, self.screen_height // 2)
-
         screen.fill((0, 0, 0))
+        origin = np.array([self.screen_width // 2, self.screen_height // 2])
+
+        # X=0, Y=0 の線を引く
+        pygame.draw.line(screen, (128, 128, 128), (0, origin[1]), (self.screen_width, origin[1]), 3)
+        pygame.draw.line(screen, (128, 128, 128), (origin[0], 0), (origin[0], self.screen_height), 3)
+
+        # 座標軸の目盛りとラベルを描画
+        marker_length = 0.02
+        text_offset = 15
+        scaled_step = int(self.convert_length(marker_length))
+
+        for coord_val in range(0, self.screen_height//2, scaled_step):
+            # X 軸
+            pygame.draw.line(screen, (128, 128, 128), (0, origin[1] + coord_val), (self.screen_width, origin[1] + coord_val))
+            pygame.draw.line(screen, (128, 128, 128), (0, origin[1] - coord_val), (self.screen_width, origin[1] - coord_val))
+
+        for coord_val in range(0, self.screen_width//2, scaled_step):
+            # Y 軸
+            pygame.draw.line(screen, (128, 128, 128), (origin[0] + coord_val, 0), (origin[0] + coord_val, self.screen_height))
+            pygame.draw.line(screen, (128, 128, 128), (origin[0] - coord_val, 0), (origin[0] - coord_val, self.screen_height))
 
         # 各頂点やリンクの描画は以下の部分で実装されています
 
