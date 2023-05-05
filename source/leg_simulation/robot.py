@@ -44,19 +44,23 @@ class Robot:
             ('M1', 'X')
         }
 
-        self.leg = Leg(self.linkage5bar_params, self.linkage4bar_params)
+        theta_1 = math.radians(-45)
+        theta_2 = math.radians(-115)
 
-    def convert_coordinates(self, coord):
+        self.leg = Leg(self.linkage5bar_params, self.linkage4bar_params)
+        endeffector_position = self.leg.compute_endeffector_position(theta_1, theta_2)
+
+    def convert_coordinates(self, coord, screen_width, screen_height):
         x, y = coord
-        x_transformed = int((x * self.scale_factor) + self.screen_width // 2)
-        y_transformed = int((-y * self.scale_factor) + self.screen_height // 2)
+        x_transformed = int((x * self.scale_factor) + screen_width // 2)
+        y_transformed = int((-y * self.scale_factor) + screen_height // 2)
         return x_transformed, y_transformed
     
     def convert_length(self, len):
         transformed = int(len * self.scale_factor)
         return transformed
 
-    def create_links(self, links, coordinates):
+    def create_links_2D(links, coordinates):
         link_coordinates = []
         for vertex1, vertex2 in links:
             if vertex1 in coordinates and vertex2 in coordinates:
@@ -65,13 +69,12 @@ class Robot:
                 link_coordinates.append((coord1, coord2))
         return link_coordinates
 
-    def draw_2d(self, screen, font, theta_1, theta_2):
-        endeffector_position = self.leg.compute_endeffector_position(theta_1, theta_2)
+    def draw_2d(self, screen, font):
         positions = self.leg.get_positions()
 
-        transformed_coordinates = {key: self.convert_coordinates(coord) for key, coord in positions.items()}
+        transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height) for key, coord in positions.items()}
 
-        links_coordinates = self.create_links(self.link_list, transformed_coordinates)
+        links_coordinates = self.create_links_2D(self.link_list, transformed_coordinates)
 
         # ここから、pygameを使った2D表示を行います
         screen.fill((0, 0, 0))
@@ -142,15 +145,63 @@ class Robot:
         glVertex3f(1, 1, 1)
         glEnd()
 
+    # legを表示する
+    def display_gl(self, surface):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glLoadIdentity()
+
+        glScalef(0.001, 0.001, 0.001)  # オブジェクトのスケール
+
+        # 脚の座標取得
+        positions = self.leg.get_positions()
+
+        transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height)
+                                   for key, coord in positions.items()}
+
+        links_coordinates = self.create_links(self.link_list, transformed_coordinates, 0.0)
+
+        # 描画処理
+        self.draw_axis()
+        self.draw_links(links_coordinates)
+
+        pygame.display.flip()
+
+    def draw_axis(self):
+        glColor3f(0.5, 0.5, 0.5)
+
+        glBegin(GL_LINES)
+        glVertex3f(-self.screen_width // 2, 0, 0)
+        glVertex3f(self.screen_width // 2, 0, 0)
+        glEnd()
+
+        glBegin(GL_LINES)
+        glVertex3f(0, -self.screen_height // 2, 0)
+        glVertex3f(0, self.screen_height // 2, 0)
+        glEnd()
+
+    def draw_links(self, links_coordinates):
+        glBegin(GL_LINES)
+        for link in links_coordinates:
+            glVertex3fv(link[0])
+            glVertex3fv(link[1])
+        glEnd()
+
+    # 座標からリンクのリストを作成する。三次元に拡張する
+    def create_links(self, links, coordinates, t):
+        link_coordinates = []
+        for vertex1, vertex2 in links:
+            if vertex1 in coordinates and vertex2 in coordinates:
+                coord1 = coordinates[vertex1][0], coordinates[vertex1][1], t
+                coord2 = coordinates[vertex2][0], coordinates[vertex2][1], t
+                link_coordinates.append((coord1, coord2))
+        return link_coordinates
+
 
 if __name__ == "__main__":
     # OpenGL Utility Toolkit(GLUT)の初期化
     glutInit(sys.argv)
-    
-    robot = Robot()
 
-    theta_1 = math.radians(-45)
-    theta_2 = math.radians(-115)
+    robot = Robot()
 
     # このフラグをTrueにすると3D表示になり、Falseにすると2D表示になります
     use_3d_view = True
@@ -180,12 +231,13 @@ if __name__ == "__main__":
             glRotatef(1, 3, 1, 1)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-            robot.draw_3d_objects((0, 0, 0))  # この関数を呼び出すだけで3D表示が可能になります
+            #robot.draw_3d_objects((0, 0, 0))  # この関数を呼び出すだけで3D表示が可能になります
+            robot.display_gl(screen)
 
             pygame.display.flip()
             pygame.time.wait(10)
         else:
-            robot.draw_2d(screen, font, theta_1, theta_2)  # この関数を呼び出すだけで2D表示が可能になります
+            robot.draw_2d(screen, font)  # この関数を呼び出すだけで2D表示が可能になります
             
             pygame.display.flip()
 
