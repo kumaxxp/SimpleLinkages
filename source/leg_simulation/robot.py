@@ -60,7 +60,7 @@ class Robot:
         transformed = int(len * self.scale_factor)
         return transformed
 
-    def create_links_2D(links, coordinates):
+    def create_links_2D(self, links, coordinates):
         link_coordinates = []
         for vertex1, vertex2 in links:
             if vertex1 in coordinates and vertex2 in coordinates:
@@ -116,9 +116,16 @@ class Robot:
         for link in links_coordinates:
             pygame.draw.line(screen, (0, 255, 0), link[0], link[1], 2)
 
+        pygame.display.flip()
+
     def init_3d_view(self):
-        gluPerspective(45, (self.screen_width / self.screen_height), 0.1, 50.0)
-        glTranslatef(0.0, 0.0, -5)
+        # gluPerspective(45, (self.screen_width / self.screen_height), 0.1, 50.0)
+        gluPerspective(0, (self.screen_width / self.screen_height), 0.1, 50.0)
+        glTranslatef(0.0, 0.0, 0.0)     # 平行移動
+
+        glutInit()
+        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
+
 
     def draw_3d_objects(self, object_position):
         # 頂点
@@ -150,13 +157,14 @@ class Robot:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        glScalef(0.001, 0.001, 0.001)  # オブジェクトのスケール
+        glScalef(0.001, -0.001, 0.001)  # オブジェクトのスケール(Y軸を上下反転)
+        glRotatef(30.0, 1.0, 0.0, 0.0)  # X軸を中心に30度傾ける
+        glRotatef(10.0, 0.0, 1.0, 0.0)  # Y軸を中心に10度傾ける
 
         # 脚の座標取得
         positions = self.leg.get_positions()
 
-        transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height)
-                                   for key, coord in positions.items()}
+        transformed_coordinates = {key: self.convert_coordinates(coord, 0, 0) for key, coord in positions.items()}
 
         links_coordinates = self.create_links(self.link_list, transformed_coordinates, 0.0)
 
@@ -165,9 +173,11 @@ class Robot:
         self.draw_links(links_coordinates)
 
         pygame.display.flip()
+        pygame.time.wait(10)
 
     def draw_axis(self):
-        glColor3f(0.5, 0.5, 0.5)
+        glColor3f(0.0, 1.0, 0.0)
+        #glColor3f(0.5, 0.5, 0.5)
 
         glBegin(GL_LINES)
         glVertex3f(-self.screen_width // 2, 0, 0)
@@ -179,7 +189,14 @@ class Robot:
         glVertex3f(0, self.screen_height // 2, 0)
         glEnd()
 
+        glBegin(GL_LINES)
+        glVertex3f(0, 0, -self.screen_height // 2)
+        glVertex3f(0, 0, self.screen_height // 2)
+        glEnd()
+
     def draw_links(self, links_coordinates):
+        glColor3f(0.5, 0.5, 0.5)
+
         glBegin(GL_LINES)
         for link in links_coordinates:
             glVertex3fv(link[0])
@@ -196,24 +213,42 @@ class Robot:
                 link_coordinates.append((coord1, coord2))
         return link_coordinates
 
+    def set_camera_position(self, object_position, distance=10):
+        # カメラの位置を計算
+        camera_position = (object_position[0], object_position[1], object_position[2] - distance)
+
+        # カメラの注視点をオブジェクトの位置に設定
+        target_position = object_position
+
+        # カメラの向きを上方向に設定（デフォルト）
+        up_direction = (0, 1, 0)
+
+        # gluLookAtを使ってカメラの位置と注視点を設定
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        gluLookAt(*camera_position, *target_position, *up_direction)
+
 
 if __name__ == "__main__":
-    # OpenGL Utility Toolkit(GLUT)の初期化
-    glutInit(sys.argv)
-
+    # ロボットの初期化
     robot = Robot()
 
     # このフラグをTrueにすると3D表示になり、Falseにすると2D表示になります
     use_3d_view = True
 
-    # Pygame 初期化
-    pygame.init()
-
     # 画面設定
     if use_3d_view:
+        # OpenGL Utility Toolkit(GLUT)の初期化
+        glutInit(sys.argv)
+        # Pygame 初期化
+        pygame.init()
+        
         screen = pygame.display.set_mode((robot.screen_width, robot.screen_height), pygame.DOUBLEBUF | pygame.OPENGL)
         robot.init_3d_view()  # 3Dビューの初期化をメソッドで行う
     else:
+        # Pygame 初期化
+        pygame.init()
+
         screen = pygame.display.set_mode((robot.screen_width, robot.screen_height))
 
     # 初期設定の追加
@@ -228,19 +263,12 @@ if __name__ == "__main__":
                 break
 
         if use_3d_view:
-            glRotatef(1, 3, 1, 1)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-            #robot.draw_3d_objects((0, 0, 0))  # この関数を呼び出すだけで3D表示が可能になります
             robot.display_gl(screen)
 
-            pygame.display.flip()
-            pygame.time.wait(10)
         else:
-            robot.draw_2d(screen, font)  # この関数を呼び出すだけで2D表示が可能になります
-            
-            pygame.display.flip()
+            robot.draw_2d(screen, font)  # この関数を呼び出すだけで2D表示が可能になります            
 
     # Pygame 終了
     pygame.quit()
     sys.exit()
+
