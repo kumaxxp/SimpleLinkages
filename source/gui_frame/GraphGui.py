@@ -47,7 +47,7 @@ class GraphGui:
         # 次の更新の予約 (1000ms = 1s 後)
         self.root.after(1000, self.update_graph)
 
-        print('update_graph')
+        #print('update_graph')
 
     def run(self):
         self.root.mainloop()
