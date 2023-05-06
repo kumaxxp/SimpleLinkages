@@ -50,8 +50,8 @@ class OpenGLManager(threading.Thread):
 
     #    glScalef(0.001, -0.001, 0.001)
         glScalef(-0.010, -0.010, 0.010)
-        glRotatef(0.0, 1.0, 0.0, 0.0)
-        glRotatef(0.0, 0.0, 1.0, 0.0)
+        glRotatef(20.0, 1.0, 0.0, 0.0)
+        glRotatef(20.0, 0.0, 1.0, 0.0)
 
         self.draw_axis()
 #        self.draw_3d_objects((1,1,1))

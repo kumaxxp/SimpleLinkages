@@ -67,11 +67,14 @@ class Robot:
     def get_link_list(self) -> List:
         return self.link_list
     
-    def set_angle(self, theta_angle_1, theta_angle_2):
+    def set_angles(self, theta_angle_1, theta_angle_2):
         with self.lock:
             self.theta_angle_1 = theta_angle_1
             self.theta_angle_2 = theta_angle_2
             self.theta_1 = math.radians(self.theta_angle_1)
             self.theta_2 = math.radians(self.theta_angle_2)
+
+    def update_position(self):
+        endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2)
 
 

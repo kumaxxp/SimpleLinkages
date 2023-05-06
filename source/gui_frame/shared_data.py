@@ -5,7 +5,7 @@ from collections import deque
 from typing import Any, Deque, Dict, List, Tuple
 
 class SharedData:
-    def __init__(self, queue_depth: int = 10):
+    def __init__(self, queue_depth: int = 100):
         self.data: Dict[str, Deque[Tuple[int, Any]]] = {}
         self.queue_depth: int = queue_depth
         self.lock: threading.Lock = threading.Lock()
