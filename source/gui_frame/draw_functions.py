@@ -3,7 +3,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import pygame
 
-from .config import speed
+from ..config import speed
 
 def draw_3d_objects(object_position):
     # 頂点

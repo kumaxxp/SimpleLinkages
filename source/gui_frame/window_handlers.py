@@ -4,7 +4,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-from .config import WINDOW_WIDTH, WINDOW_HEIGHT
+from ..config import WINDOW_WIDTH, WINDOW_HEIGHT
 from .draw_functions import draw_2d_objects
 
 def set_camera_position(object_position, distance=10):
