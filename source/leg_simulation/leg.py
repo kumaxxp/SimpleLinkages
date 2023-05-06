@@ -1,7 +1,5 @@
-import math
-
-from linkage5bar import Linkage5Bar
-from linkage4bar import Linkage4Bar
+from .linkage5bar import Linkage5Bar
+from .linkage4bar import Linkage4Bar
 
 class Leg:
     def __init__(self, linkage5bar_params, linkage4bar_params):

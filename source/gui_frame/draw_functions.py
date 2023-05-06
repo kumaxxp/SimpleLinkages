@@ -3,8 +3,8 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import pygame
 
-from config import speed
-from utils import get_color_by_speed
+from .config import speed
+from .utils import get_color_by_speed
 
 def draw_3d_objects(object_position):
     # 頂点

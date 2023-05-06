@@ -81,6 +81,27 @@ class GuiManager(tk.Tk):
         super().mainloop() # Change this line
 ```
 
+### ディレクトリ構造を整えて、ライブラリの構成を初期化する
+
+main.pyから、leg_simulationディレクトリのすべてのライブラリを呼び出すことができるように、__init__.pyを作ってください。
+また、gui_frameディレクトリのライブラリも呼び出せるように__init__.pyを設定してください。
+
+ディレクトリ構成は以下のようになっています。
+
+source/
+├── main.py
+├── leg_simulation/
+│   ├── leg.py
+│   ├── linkage4bar.py
+│   ├── linkage5bar.py
+│   └── robot.py
+│
+├── gui_frame/
+│   ├── GraphGui.py
+│   ├── opengl_manager.py
+│   ├── pygame_manager.py
+│   └── shared_data.py
+
 
 
 

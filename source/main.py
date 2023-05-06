@@ -1,12 +1,14 @@
+from leg_simulation import Robot
+from gui_frame import GraphGui, OpenGLManager, PygameManager, SharedData
+
 import time
 import threading
 
-from GraphGui import GraphGui
-from opengl_manager import OpenGLManager
-from pygame_manager import PygameManager
-from shared_data import SharedData
-
+# 残りの main.py コード
 def main():
+    # ロボットの初期化
+    robot = Robot()
+
     shared_data = SharedData()
     initial_time = time.time()
 
@@ -30,3 +32,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

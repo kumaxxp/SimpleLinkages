@@ -1,8 +1,8 @@
 import pygame
 from pygame.locals import *
 
-from config import WINDOW_WIDTH, WINDOW_HEIGHT
-from draw_functions import draw_2d_objects
+from .config import WINDOW_WIDTH, WINDOW_HEIGHT
+from .draw_functions import draw_2d_objects
 
 class PygameManager:
     def __init__(self, shared_data):

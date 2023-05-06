@@ -10,7 +10,7 @@ from OpenGL.GLU import *
 import pygame
 import sys
 
-from leg import Leg
+from .leg import Leg
 
 class Robot:
     def __init__(self):

@@ -19,5 +19,5 @@ def get_color_by_speed(speed):
     
 def update_object_position(initial_time, speed):
     elapsed_time = time.time() - initial_time
-    x = speed * elapsed_time % 5.0
+    x = float(speed) * elapsed_time % 5.0
     return x, 0.0, 0.0

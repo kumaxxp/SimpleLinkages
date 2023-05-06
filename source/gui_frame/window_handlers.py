@@ -4,28 +4,8 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-from config import WINDOW_WIDTH, WINDOW_HEIGHT, speed
-from draw_functions import draw_2d_objects
-import gui_input
-
-def keyboard_callback(key, x, y):
-    global speed
-
-    slider_value = gui_input.get_slider_value()
-    print(slider_value)  # 現在のスライダ値をコンソールに表示
-    
-    # 上矢印キーで速度を増加
-    if key == GLUT_KEY_UP:
-        speed += 0.1
-
-    # 下矢印キーで速度を減少
-    elif key == GLUT_KEY_DOWN:
-        speed -= 0.1
-
-    # リミット速度
-    speed = max(0.0, speed)
-
-    print("Speed:", speed)
+from .config import WINDOW_WIDTH, WINDOW_HEIGHT
+from .draw_functions import draw_2d_objects
 
 def set_camera_position(object_position, distance=10):
     # カメラの位置を計算

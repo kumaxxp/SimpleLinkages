@@ -2,10 +2,10 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
-from config import WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_CLIP_PLANE, FAR_CLIP_PLANE
-from draw_functions import draw_3d_objects
-from utils import update_object_position
-from window_handlers import set_camera_position, keyboard_callback
+from .config import WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_CLIP_PLANE, FAR_CLIP_PLANE
+from .draw_functions import draw_3d_objects
+from .utils import update_object_position
+from .window_handlers import set_camera_position
 
 class OpenGLManager:
     def __init__(self, initial_time, shared_data):
@@ -34,19 +34,21 @@ class OpenGLManager:
         # OpenGL のコールバック関数の設定
         glutDisplayFunc(self.display_callback)
         glutIdleFunc(glutPostRedisplay)
-        glutSpecialFunc(keyboard_callback)
+        #glutSpecialFunc(keyboard_callback)
 
     def display_callback(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        speed = self.shared_data.get_value("speed")
+        speed_list = self.shared_data.get_data("speed")
 
         # If speed is None, set it to a default value (e.g., 0.0)
-        if speed is None:
+        if not speed_list:
             speed = 0.0
+        else:
+            print(speed_list)
+            speed = speed_list[-1]
 
         object_position = update_object_position(self.initial_time, speed=speed)
-        print(speed)
 
         draw_3d_objects(object_position)
 

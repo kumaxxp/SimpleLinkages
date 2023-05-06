@@ -1,6 +1,8 @@
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+import gui_manager as GuiManager
+import tkinter as tk
 
 class GuiManagerWithPlot(GuiManager):
     def __init__(self, shared_data):

@@ -13,29 +13,33 @@
 source/
 ├── main.py
 ├── leg_simulation/
+│   ├── __init__.py
 │   ├── leg.py
 │   ├── linkage4bar.py
 │   ├── linkage5bar.py
 │   └── robot.py
 │
 ├── gui_frame/
-│   ├── gui_manager.py
+│   ├── __init__.py
+│   ├── GraphGui.py
 │   ├── opengl_manager.py
 │   ├── pygame_manager.py
 │   └── shared_data.py
-
 ```
 
 各ファイルの説明:
 
 1. `main.py`: プログラムのメイン部分。他のモジュールをインポートして実行します。
-2. `gui_manager.py`: ボタンやスライダ入力と、グラフ表示を行う
+2. `GraphGui.py`: ボタンやスライダ入力と、グラフ表示を行う
 3. `opengl_manager.py`: 3D表示を行う
 4. `pygame_manager.py`: 2D表示を行う
 5. `shared_data.py` : スレッドセーフなデータ共有モジュール
 
 -------
 
+クラス構造
+
+-------
 
 ## leg_simulation
 
