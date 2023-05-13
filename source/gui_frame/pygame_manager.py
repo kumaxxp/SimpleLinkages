@@ -23,7 +23,7 @@ class PygameManager:
 
     def run(self):
         pygame.init()
-        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.DOUBLEBUF)
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("2D View")
 
         running = True
@@ -40,9 +40,11 @@ class PygameManager:
             # 2D オブジェクトの描画
             self.draw_2d(screen, font)
 
-            pygame.display.flip()
+            pygame.display.update()
+            #pygame.display.flip()
 
-            clock.tick(60)
+            clock.tick(30)
+            pygame.time.delay(50)
 
         pygame.quit()
 
