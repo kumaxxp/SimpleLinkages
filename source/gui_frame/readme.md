@@ -349,68 +349,6 @@ class draw_functions << (O, other_style) >> {
 
 このクラス図では、描画関数がどのような引数を受け取り、どのような機能を持っているかをリストしています。これにより、プログラマはモジュールを実装する際に必要な情報が得られます。
 
----
-
->windows_handlers.pyの機能を表した詳細な仕様を説明してください。
-仕様を読んだプログラマがpythonで実装できるように書いてください。
-マークダウンでお願いします。
-また、windows_handlers.pyのクラス図をplantumlで詳細に書いて実装に役立てることができるようにしてください。
-以下、ソースコードです。
-
----
-
-以下は、`windows_handlers.py` の機能を表した詳細な仕様です。
-
-## windows_handlers.py 仕様
-
-### 概要
-`windows_handlers.py` モジュールでは、キーボード入力の処理とウィンドウ表示に関連する関数が提供されています。また、OpenGLおよびPygameライブラリを使用してグラフィックスを描画します。
-
-### keyboard_callback(key, x, y)
-- 引数：
-  - `key`: 押されたキーコード
-  - `x`, `y`: キーイベント時のマウスポインタの座標
-- 機能：特定のキー入力に応じて速度を増減させ、現在の速度をコンソールに出力します。
-
-### set_camera_position(object_position, distance=10)
-- 引数：
-  - `object_position`: オブジェクトの位置タプル（x, y, z）
-  - `distance`: カメラからオブジェクトまでの距離（デフォルトは10）
-- 機能：カメラの位置と注視点を設定し、3Dシーンの表示を更新します。
-
-### draw_graph(screen, data, color, origin, axis_scale)
-- 引数：
-  - `screen`: Pygame スクリーンオブジェクト
-  - `data`: グラフに表示するデータのリスト
-  - `color`: グラフの線の色
-  - `origin`: グラフの原点座標（x, y）
-  - `axis_scale`: x軸およびy軸の単位スケール
-- 機能：Pygameを使用して、指定されたデータをグラフとして描画します。
-
-### draw_pygame_window()
-- 引数：なし
-- 機能：Pygameウィンドウを作成し、2Dオブジェクトとグラフを描画します。ウィンドウが閉じられるか、Escキーが押されるまで実行を継続します。
-
-以下は、`windows_handlers.py` モジュールの詳細な PlantUML クラス図です:
-
-```plantuml
-@startuml
-
-!define other_style #98FB98
-
-class windows_handlers << (O, other_style) >> {
-  +keyboard_callback(key: int, x: int, y: int): None
-  +set_camera_position(object_position: Tuple[float, float, float], distance: float = 10): None
-  +draw_graph(screen: pygame.display, data: List[int], color: Tuple[int, int, int], origin: Tuple[int, int], axis_scale: Tuple[int, int]): None
-  +draw_pygame_window(): None
-}
-
-@enduml
-```
-
-このクラス図では、各関数がどのような引数を受け取り、どのような機能を持っているかをリストしています。これにより、プログラマはモジュールを実装する際に必要な情報が得られます。
-
----
 
 >GuiManagerWithPlotの機能を表した詳細な仕様を説明してください。
 仕様を読んだプログラマがpythonで実装できるように書いてください。
