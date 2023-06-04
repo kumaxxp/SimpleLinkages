@@ -4,6 +4,8 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 
+import numpy as np
+
 import threading
 
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, SCALE_FACTOR, NEAR_CLIP_PLANE, FAR_CLIP_PLANE
@@ -44,6 +46,16 @@ class OpenGLManager(threading.Thread):
         glutDisplayFunc(self.display_callback)
         glutIdleFunc(glutPostRedisplay)
         #glutSpecialFunc(keyboard_callback)
+
+        # 線の太さの範囲を取得
+        range_buffer = (GLfloat * 2)()
+        glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, range_buffer)
+
+        min_line_width = range_buffer[0]
+        max_line_width = range_buffer[1]
+
+        print(f"Line width range: {min_line_width} to {max_line_width}")
+
 
     def display_callback(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -105,7 +117,9 @@ class OpenGLManager(threading.Thread):
 
         # 描画処理
 #        self.draw_axis()
-        self.draw_links(links_coordinates)
+#        self.draw_links(links_coordinates)
+        self.draw_links_cylinder(links_coordinates, 10.0)
+
 
         pygame.display.flip()
         pygame.time.wait(10)
@@ -129,15 +143,93 @@ class OpenGLManager(threading.Thread):
         glVertex3f(0, 0, self.screen_height // 2)
         glEnd()
 
-    def draw_links(self, links_coordinates):
+    def draw_links_wire(self, links_coordinates):
     #    glColor3f(0.5, 0.5, 0.5)
         glColor3f(1.0, 1.0, 1.0)
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [1.0, 1.0, 1.0, 1.0])
+
+        # 線の太さを設定
+        glLineWidth(4.0)
 
         glBegin(GL_LINES)
         for link in links_coordinates:
             glVertex3fv(link[0])
             glVertex3fv(link[1])
         glEnd()
+
+    def draw_links(self, links_coordinates):
+        glColor3f(1.0, 1.0, 1.0)
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [1.0, 1.0, 1.0, 1.0])
+
+        for link in links_coordinates:
+            self.draw_cylinder(link[0], link[1], 0.05)  # 0.05は太さを表しています
+
+    def draw_cylinder(self, start, end, radius, height):
+        start = np.array(start)
+        end = np.array(end)
+        direction = end - start
+
+        up = np.array([0, 0, 1])
+        z_axis = direction / np.linalg.norm(direction)
+        x_axis = np.cross(up, z_axis)
+        y_axis = np.cross(z_axis, x_axis)
+
+        rotation_matrix = np.eye(4)
+        rotation_matrix[:3, 0] = x_axis
+        rotation_matrix[:3, 1] = y_axis
+        rotation_matrix[:3, 2] = z_axis
+        rotation_matrix[3, 3] = 1
+        glPushMatrix()
+
+        glTranslatef(start[0], start[1], start[2])
+        glMultMatrixf(rotation_matrix.T.flatten())
+    #    glColor3f(0.5, 0.1, 0.1)
+
+        glDisable(GL_TEXTURE_2D)
+
+        quadric = gluNewQuadric()
+        gluQuadricNormals(quadric, GLU_SMOOTH)
+        gluQuadricTexture(quadric, GL_TRUE)
+        gluCylinder(quadric, radius, radius, height, 32, 32)
+
+        glEnable(GL_TEXTURE_2D)
+        
+        glPopMatrix()
+
+    def enable_lighting(self):
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+
+        glLightfv(GL_LIGHT0, GL_POSITION, [0.0, -100.0, -100.0, 0.0])
+
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.01, 0.01, 0.01, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.06, 0.06, 0.06, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.03, 0.03, 0.03, 1.0])
+
+        # 反射パラメーターを設定
+        glMaterialf(GL_FRONT, GL_SHININESS, 50)
+
+        # 反射光の設定
+        glMaterialfv(GL_FRONT, GL_SPECULAR, GLfloat_3(0.1, 0.1, 0.1))
+
+    def draw_links_cylinder(self, links_coordinates, radius=0.1):
+        self.enable_lighting()
+
+#        glColor3f(1.0, 1.0, 1.0)
+#        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [0.06, 0.06, 0.06, 1.0])
+#        glMaterialfv(GL_FRONT, GL_SPECULAR, [0.1, 0.1, 0.1, 1.0])
+#        glMaterialf(GL_FRONT, GL_SHININESS, 50.0)
+
+        for link in links_coordinates:
+            start = link[0]
+            end = link[1]
+            height = np.linalg.norm(np.array(end) - np.array(start))
+            self.draw_cylinder(start, end, radius, height)
+
+        # Disable lighting after drawing
+        glDisable(GL_LIGHTING)
 
     def set_camera_position(self, object_position, distance=10):
         # カメラの位置を計算
@@ -170,3 +262,36 @@ class OpenGLManager(threading.Thread):
         y_transformed = int((-y * self.scale_factor) + screen_height // 2)
         return x_transformed, y_transformed
     
+    def get_orientation_quaternion(self, direction):
+        up = np.array([0, 1, 0])
+        axis = np.cross(up, direction)
+        axis_norm = np.linalg.norm(axis)
+
+        if axis_norm < 0.0001:
+            return np.array([1, 0, 0, 0])
+
+        axis_normalized = axis / axis_norm
+
+        angle_over_two = np.arccos(np.dot(up, direction)) / 2
+        sin_angle_over_two = np.sin(angle_over_two)
+
+        return np.array([
+            np.cos(angle_over_two),
+            axis_normalized[0] * sin_angle_over_two,
+            axis_normalized[1] * sin_angle_over_two,
+            axis_normalized[2] * sin_angle_over_two
+        ])
+
+    def quaternion_to_axis_angle(self, quat):
+        if abs(1.0 - quat[0]) < 0.0001:
+            return 0, 0, 1, 0
+
+        angle = 2 * np.arccos(quat[0])
+        temp = np.sqrt(1 - (quat[0] ** 2))
+
+        x = quat[1] / temp
+        y = quat[2] / temp
+        z = quat[3] / temp
+        
+        return np.degrees(angle), x, y, z
+
