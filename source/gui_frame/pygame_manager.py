@@ -94,6 +94,13 @@ class PygameManager:
         for link in links_coordinates:
             pygame.draw.line(screen, (0, 255, 0), link[0], link[1], 2)
 
+        # リミットなどの情報
+        limit = self.robot.get_distance_B2_X()
+        if limit != None:
+            label_text = f"{'limit info'}({0.030:.4f}, {limit:.4f}"
+            label = font.render(label_text, True, (255, 255, 255))
+            screen.blit(label, (0 + 10, 0 + 10))
+
 
     def convert_length(self, len):
         transformed = int(len * self.scale_factor)

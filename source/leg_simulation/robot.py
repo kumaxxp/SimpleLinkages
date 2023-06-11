@@ -77,4 +77,6 @@ class Robot:
     def update_position(self):
         endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2)
 
+    def get_distance_B2_X(self):
+        return self.leg.get_distance_B2_X()
 

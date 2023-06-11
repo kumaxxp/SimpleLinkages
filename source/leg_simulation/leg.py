@@ -8,12 +8,16 @@ class Leg:
 
     def compute_endeffector_position(self, theta_1, theta_2):
 
-        positions_5bar = self.linkage5bar.compute_all_positions(theta_1, theta_2)
-        X = positions_5bar["X"]
-        M1 = positions_5bar["M1"]
+        positions_5bar, blimit = self.linkage5bar.compute_all_positions(theta_1, theta_2)
+        if blimit == False:
+            X = positions_5bar["X"]
+            M1 = positions_5bar["M1"]
 
-        positions_4bar = self.linkage4bar.compute_all_positions(M1, X, theta_1)
-        endeffector_position = positions_4bar['E']
+            positions_4bar = self.linkage4bar.compute_all_positions(M1, X, theta_1)
+            endeffector_position = positions_4bar['E']
+        else:
+            positions_4bar = self.linkage4bar.get_positions()
+            endeffector_position = positions_4bar['E']
 
         return endeffector_position
 
@@ -40,4 +44,7 @@ class Leg:
 
     def inverse_kinematics(self, target_position: tuple) -> dict:
         pass  # To be implemented
+
+    def get_distance_B2_X(self):
+        return self.linkage5bar.get_distance_B2_X()
 

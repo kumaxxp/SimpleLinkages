@@ -6,6 +6,14 @@ import matplotlib.dates as mdates
 
 from leg_simulation import Robot
 
+COUNT = 5
+
+THETA1_MIN = -90
+THETA1_MAX = 0
+
+THETA2_MIN = -180
+THETA2_MAX = -90
+
 class GraphGui:
     def __init__(self, shared_data):
         self.shared_data = shared_data
@@ -21,13 +29,13 @@ class GraphGui:
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
         # Angle theta1 slider settings
-        self.theta1_slider = tk.Scale(self.root, from_=-180, to=180, orient=tk.HORIZONTAL,
+        self.theta1_slider = tk.Scale(self.root, from_=THETA1_MIN, to=THETA1_MAX, orient=tk.HORIZONTAL,
                                  command=self.update_angles, label="Theta1")
         self.theta1_slider.set(-45)  # Set the default value for Theta1
         self.theta1_slider.pack(fill=tk.X, expand=True)
 
         # Angle theta2 slider settings
-        self.theta2_slider = tk.Scale(self.root, from_=-180, to=180, orient=tk.HORIZONTAL,
+        self.theta2_slider = tk.Scale(self.root, from_=THETA2_MIN, to=THETA2_MAX, orient=tk.HORIZONTAL,
                                  command=self.update_angles, label="Theta2")
         self.theta2_slider.set(-115)  # Set the default value for Theta2
         self.theta2_slider.pack(fill=tk.X, expand=True)

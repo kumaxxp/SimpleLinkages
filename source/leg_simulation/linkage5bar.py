@@ -17,6 +17,8 @@ class Linkage5Bar:
         self.theta_M1 = None
         self.theta_M2 = None
 
+        self.distance_B2_X = 0.0
+
     @staticmethod
     def circle_intersection(c1, r1, c2, r2):
         d = np.linalg.norm(c1 - c2)
@@ -71,16 +73,25 @@ class Linkage5Bar:
         else:
             X_x, X_y = X2
 
-        # Save all positions and angles in the Positions member variable
-        self.Positions = {
-            'B1': (self.B1[0], self.B1[1]),
-            'B2': (self.B2[0], self.B2[1]),
-            'M1': (M1_x, M1_y),
-            'M2': (M2_x, M2_y),
-            'X': (X_x, X_y),
-        }
+        # Compute the distance between point B2 and X
+        self.distance_B2_X = np.sqrt((self.B2[0] - X_x)**2 + (self.B2[1] - X_y)**2)
 
-        return self.Positions
+        if self.distance_B2_X >= 0.030:
+            # Save all positions and angles in the Positions member variable
+            self.Positions = {
+                'B1': (self.B1[0], self.B1[1]),
+                'B2': (self.B2[0], self.B2[1]),
+                'M1': (M1_x, M1_y),
+                'M2': (M2_x, M2_y),
+                'X': (X_x, X_y),
+            }
+            blimit = False
+        else:
+            blimit = True
+
+        # B2-Xの距離がリミットの30.0mm 以下の場合は座標を更新して、blimitはFalse
+        # B2-Xの距離がリミットの30.0mm より大きい場合は座標を更新せず、blimitはTrue
+        return self.Positions, blimit
     
     def get_positions(self):
         return self.Positions
@@ -101,4 +112,7 @@ class Linkage5Bar:
         beta = math.atan2(y, x)
         gamma = math.asin((self.m2 * math.sin(self.theta_M2)) / math.sqrt(x ** 2 + y ** 2))
         self.theta_M1 = beta - gamma
+
+    def get_distance_B2_X(self):
+        return self.distance_B2_X
 

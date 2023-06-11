@@ -11,6 +11,16 @@ class Linkage4Bar:
 
         self.linkage5bar = linkage5bar_instance
 
+        # 初期値
+        self.Positions = {
+            "A": (0, 0),
+            "B": (0, 0),
+            "C": (0, 0),
+            "D": (0, 0),
+            "E": (0, 0)
+        }
+
+
     def update_positions(self):
         A_x, A_y = self.linkage5bar.B1
         D_x, D_y = self.linkage5bar.B2
