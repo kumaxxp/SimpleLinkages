@@ -1,5 +1,7 @@
 import socket
 from construct import Struct, Array, Int32ub
+import threading
+import time
 
 class ServoCmd:
     def __init__(self):
@@ -22,28 +24,34 @@ ServoFbStruct = Struct(
 HOST = '192.168.1.100'
 PORT = 80
 
-# サーボコマンドオブジェクトの作成
-servo_cmd = ServoCmd()
+def send_data(s):
+    while True:
+        servo_cmd = ServoCmd()
+        cmd_data = ServoCmdStruct.build({"a_angle": servo_cmd.a_angle})
+        s.sendall(cmd_data)
+        time.sleep(1)
+        print("send")
 
-# Constructを使いサーボコマンドオブジェクトをバイト列に変換
-cmd_data = ServoCmdStruct.build({"a_angle": servo_cmd.a_angle})
+
+def recv_data(s):
+    response_size = 56
+    while True:
+        data = s.recv(response_size)
+        parsed_data = ServoFbStruct.parse(data)
+        servo_fb = ServoFb(**parsed_data)
+        print(servo_fb.a_angle)
+        print(servo_fb.a_vol)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    # M5Stackに接続
     s.connect((HOST, PORT))
-    
-    # コマンドを送信
-    s.sendall(cmd_data)
 
-    # 応答を受信
-    response_size = 56 # Arduinoから7つのunsigned intを2セット受け取るので、4*7*2=56バイトを読み込む
-    data = s.recv(response_size)
+    time.sleep(1)
 
-# 受信したデータをパース
-parsed_data = ServoFbStruct.parse(data)
+    send_thread = threading.Thread(target=send_data, args=(s,))
+    recv_thread = threading.Thread(target=recv_data, args=(s,))
 
-# パースしたデータをServoFbオブジェクトに変換
-servo_fb = ServoFb(**parsed_data)
+    send_thread.start()
+    recv_thread.start()
 
-print(servo_fb.a_angle)  # 受信した角度データを表示
-print(servo_fb.a_vol)  # 受信した電圧データを表示
+    send_thread.join()
+    recv_thread.join()
