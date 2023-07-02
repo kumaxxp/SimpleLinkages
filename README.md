@@ -66,3 +66,14 @@ conda install sympy
 
 PyDyで計算できそう
 https://pydy.readthedocs.io/en/stable/examples/rocket-car.html
+
+
+----
+
+2023/7/2
+必要な作業
+
++ PCからの切断後、再接続待ちになるようにArduino側のソフトを改良する
++ Constructを使って、通信データのパースが楽にできるように実装する
++ サーボからの角度データ、電圧を受信して、PC側に表示する
++ PC側の機構データに反映して、脚の角度が可視化できるようにする
