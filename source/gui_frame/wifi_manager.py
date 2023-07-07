@@ -1,33 +1,12 @@
 import socket
-from construct import Struct, Array, Int32ub, Int32ul, Int32sl
-
-class ServoCmd:
-    def __init__(self):
-        self.a_angle = [0]*7
-
-class ServoFb:
-    def __init__(self, a_angle: list, a_vol: list, **kwargs):
-        self.a_angle = a_angle
-        self.a_vol = a_vol
-
-ServoCmdStruct = Struct(
-    "a_angle" / Array(7, Int32ul)
-)
-
-ServoFbStruct = Struct(
-    "a_angle" / Array(7, Int32sl),
-    "a_vol" / Array(7, Int32ul)
-)
-
-import tkinter as tk
+from .shared_data import SharedData, ServoCmd, ServoFb, ServoCmdStruct, ServoFbStruct
 
 HOST = '192.168.1.100'
 PORT = 80
 
-class WifiManager(tk.Tk):
+class WifiManager:
     def __init__(self, shared_data):
         super().__init__()
-        self.title("WiFi Manager")
         self.shared_data = shared_data
 
     def run(self):

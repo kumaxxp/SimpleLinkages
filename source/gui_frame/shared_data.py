@@ -30,6 +30,16 @@ class SharedData:
         self.queue_depth: int = queue_depth
         self.lock: threading.Lock = threading.Lock()
 
+        self._cmd_data_lock: threading.Lock = threading.Lock()
+        self._fb_data_lock: threading.Lock = threading.Lock()        
+
+        # 全て0で初期化
+        self.cmd_data = ServoCmdStruct.build({"a_angle": [0]*7})
+        self.fb_data  = ServoFbStruct.build({
+            "a_angle": [0]*7,
+            "a_vol": [0]*7
+        })
+
     def set_data(self, key: str, timestamp_ms: int, value: Any) -> None:
         with self.lock:
             if key not in self.data:
@@ -40,4 +50,23 @@ class SharedData:
         with self.lock:
             return list(self.data.get(key, []))
 
+    @property
+    def cmd_data(self):
+        with self._cmd_data_lock:
+            return self._cmd_data
 
+    @cmd_data.setter
+    def cmd_data(self, value):
+        with self._cmd_data_lock:
+            self._cmd_data = value
+
+    @property
+    def fb_data(self):
+        with self._fb_data_lock:
+            return self._fb_data
+
+    @fb_data.setter
+    def fb_data(self, value):
+        with self._fb_data_lock:
+            self._fb_data = value
+            
