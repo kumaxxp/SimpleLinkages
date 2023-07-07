@@ -4,6 +4,26 @@ import threading
 from collections import deque
 from typing import Any, Deque, Dict, List, Tuple
 
+from construct import Struct, Array, Int32ul, Int32sl
+
+class ServoCmd:
+    def __init__(self):
+        self.a_angle = [0]*7
+
+class ServoFb:
+    def __init__(self, a_angle: list, a_vol: list, **kwargs):
+        self.a_angle = a_angle
+        self.a_vol = a_vol
+
+ServoCmdStruct = Struct(
+    "a_angle" / Array(7, Int32ul)
+)
+
+ServoFbStruct = Struct(
+    "a_angle" / Array(7, Int32sl),
+    "a_vol" / Array(7, Int32ul)
+)
+
 class SharedData:
     def __init__(self, queue_depth: int = 100):
         self.data: Dict[str, Deque[Tuple[int, Any]]] = {}

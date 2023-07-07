@@ -41,16 +41,14 @@ while True:
         response_size = 56 # Arduinoから7つのunsigned intを2セット受け取るので、4*7*2=56バイトを読み込む
         data = s.recv(response_size)
 
-        print("A")
         # 受信したデータをパース
         parsed_data = ServoFbStruct.parse(data)
-        print("B")
 
         # パースしたデータをServoFbオブジェクトに変換
         servo_fb = ServoFb(**parsed_data)
 
-        print(servo_fb.a_angle)  # 受信した角度データを表示
-        print(servo_fb.a_vol)  # 受信した電圧データを表示
+        print(servo_fb.a_angle) # 受信した角度データを表示
+        print(servo_fb.a_vol)   # 受信した電圧データを表示
 
     except KeyboardInterrupt:
         print("Terminating...")
