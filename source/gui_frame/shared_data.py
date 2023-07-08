@@ -30,12 +30,12 @@ class SharedData:
         self.queue_depth: int = queue_depth
         self.lock: threading.Lock = threading.Lock()
 
-        self._cmd_data_lock: threading.Lock = threading.Lock()
-        self._fb_data_lock: threading.Lock = threading.Lock()        
+        self._servo_cmd_lock: threading.Lock = threading.Lock()
+        self._servo_fb_lock: threading.Lock = threading.Lock()        
 
         # 全て0で初期化
-        self.cmd_data = ServoCmdStruct.build({"a_angle": [0]*7})
-        self.fb_data  = ServoFbStruct.build({
+        self.servo_cmd = ServoCmdStruct.build({"a_angle": [0]*7})
+        self.servo_fb  = ServoFbStruct.build({
             "a_angle": [0]*7,
             "a_vol": [0]*7
         })
@@ -51,22 +51,22 @@ class SharedData:
             return list(self.data.get(key, []))
 
     @property
-    def cmd_data(self):
-        with self._cmd_data_lock:
-            return self._cmd_data
+    def servo_cmd(self):
+        with self._servo_cmd_lock:
+            return self._servo_cmd
 
-    @cmd_data.setter
-    def cmd_data(self, value):
-        with self._cmd_data_lock:
-            self._cmd_data = value
+    @servo_cmd.setter
+    def servo_cmd(self, value):
+        with self._servo_cmd_lock:
+            self._servo_cmd = value
 
     @property
-    def fb_data(self):
-        with self._fb_data_lock:
-            return self._fb_data
+    def servo_fb(self):
+        with self._servo_fb_lock:
+            return self._servo_fb
 
-    @fb_data.setter
-    def fb_data(self, value):
-        with self._fb_data_lock:
-            self._fb_data = value
+    @servo_fb.setter
+    def servo_fb(self, value):
+        with self._servo_fb_lock:
+            self._servo_fb = value
             

@@ -79,7 +79,84 @@ https://pydy.readthedocs.io/en/stable/examples/rocket-car.html
   + Arduinoのwifiテストサンプルをサーボコントロール側にマージする...完了
 + PC側の機構データに反映して、脚の角度が可視化できるようにする
   + ワイヤーフレーム表示に反映する
-    + まず、wifi-test.pyの実装をmain.pyにマージして、通信データを受信
+    + まず、wifi-test.pyの実装をmain.pyにマージして、通信データを受信...完了
+    + 他のライブラリとの関係をクラス図にして、受信したデータを
+        self.robot.set_angles(theta1, theta2)
+        self.robot.update_position()
+      の形で値をセットして、アップデートして角度を決める。
+      サーボのポイントから角度を割り出す関数を作成して、その角度をrobotにセットする。
+    
+
 
 + 原点調整ができるようにする。調整モードで立ち上げた後、微調整してファイルに保存し、次回起動時は微調整値を読み込んで起動する
 
+```plantuml
+@startuml
+
+class Robot <<Singleton>> {
+}
+
+class SharedData {
+
+}
+
+class GraphGui {
+    +run()
+}
+
+GraphGui -left- SharedData 
+
+class OpenGLManager {
+   +run()
+}
+
+OpenGLManager -- Robot 
+
+class PygameManager {
+    +run()
+}
+
+PygameManager -- Robot 
+
+class WifiManager {
+    +run()
+}
+
+WifiManager -right- SharedData 
+
+SharedData o-u- Robot 
+
+note top of OpenGLManager
+  ロボットを3D表示する
+end note
+
+note top of PygameManager
+  ロボットを2D表示する
+end note
+
+note left of Robot
+  ロボットの情報を保持
+  現在の状態を常時計算する
+  <b>スイッチの切り替え</b>で、
+  wifi経由で実機を反映するか、
+  PCのシミュレーションか選択
+end note
+
+note bottom of WifiManager
+  実機とWifi接続して、
+  ハードのデータを取得する
+end note
+
+note bottom of GraphGui
+  PCのGUIからユーザの
+  入力を取得する
+end note
+
+note bottom of SharedData
+  スレッドセーフに
+  データを共有する
+end note
+
+@enduml
+
+```
