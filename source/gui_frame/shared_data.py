@@ -6,6 +6,14 @@ from typing import Any, Deque, Dict, List, Tuple
 
 from construct import Struct, Array, Int32ul, Int32sl
 
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
 class ServoCmd:
     def __init__(self):
         self.a_angle = [0]*7
@@ -24,7 +32,7 @@ ServoFbStruct = Struct(
     "a_vol" / Array(7, Int32ul)
 )
 
-class SharedData:
+class SharedData(metaclass=Singleton):
     def __init__(self, queue_depth: int = 100):
         self.data: Dict[str, Deque[Tuple[int, Any]]] = {}
         self.queue_depth: int = queue_depth

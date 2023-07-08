@@ -160,3 +160,100 @@ end note
 @enduml
 
 ```
+
+
+
+---
+
+# SharedData クラス
+
+## 概要
+`SharedData`クラスは、複数のスレッド間で共有可能なデータをスレッドセーフに管理するためのクラスです。このクラスでは、特定のデータ(`servocmd` と `ServoFb`) がプロパティとして実装されており、それぞれのアクセスがスレッドセーフとなるようにロックが適用されています。これにより、同時にアクセスしようとする複数のスレッドからのデータ競合や不整合を防いでいます。また、Singletonパターンが適用されており、全体で一つのインスタンスしか生成されません。
+
+## クラス図
+```plantuml
+
+@startuml
+
+class Singleton {
+  + Instance(class_name: str) -> Any
+}
+
+Class ServoCmdStruct {
+    - cmd: str
+    + __init__(self, cmd: str)
+    + execute(self): None
+    + __eq__(self, other: Any): bool
+}
+
+Class ServoFbStruct {
+    - fb: str
+    + __init__(self, fb: str)
+    + get_feedback(self): str
+    + __eq__(self, other: Any): bool
+}
+
+class SharedData {
+    - data: Dict[str, Deque[Tuple[int, Any]]]
+    - queue_depth: int
+    - lock: threading.Lock
+    - _servo_cmd_lock: threading.Lock
+    - _servo_fb_lock: threading.Lock
+    - _servo_cmd: ServoCmdStruct
+    - _servo_fb: ServoFbStruct
+
+    + __init__(self, queue_depth: int = 100): None
+    + set_data(self, key: str, timestamp_ms: int, value: Any) -> None
+    + get_data(self, key: str) -> List[Tuple[int, Any]]
+    + {static} servo_cmd(self)
+    + {static} servo_cmd(self, value)
+    + {static} servo_fb(self)
+    + {static} servo_fb(self, value)
+}
+
+Singleton -u-^ SharedData : Inherits >
+SharedData o-d- ServoCmdStruct : Contains >
+SharedData o-d- ServoFbStruct : Contains >
+
+@enduml
+
+```
+
+## 属性
+
+- `data`: 各キーの時系列データを保持する辞書。
+- `queue_depth`: 保持する時系列データの深さ(デフォルト値:100)。
+- `lock`: スレッドセーフな操作のための総合的なロックオブジェクト。
+- `_servo_cmd_lock`: `ServoCmd` オブジェクトへのアクセスをスレッドセーフにするためのロックオブジェクト。
+- `_servo_fb_lock`: `ServoFb` オブジェクトへのアクセスをスレッドセーフにするためのロックオブジェクト。
+- `_servo_cmd`: `ServoCmdStruct` オブジェクト。
+- `_servo_fb`: `ServoFbStruct` オブジェクト。
+
+## メソッド
+
+### `__init__(self, queue_depth: int = 100): None`
+コンストラクタです。queue_depth は時系列データの最大保存数を指定します。
+
+### `set_data(self, key: str, timestamp_ms: int, value: Any) -> None`
+指定されたキーに対応する時系列データを追加します。timestamp_msはUnixエポックからのミリ秒単位のタイムスタンプです。
+
+### `get_data(self, key: str) -> List[Tuple[int, Any]]`
+指定されたキーに対応する全時系列データを取得します。
+
+### `servo_cmd(self)`
+`ServoCmdStruct` オブジェクトを取得します。スレッドセーフにアクセスされます。
+
+### `servo_cmd(self, value)`
+`ServoCmdStruct` オブジェクトを設定します。スレッドセーフにアクセスされます。
+
+### `servo_fb(self)`
+`ServoFbStruct` オブジェクトを取得します。スレッドセーフにアクセスされます。
+
+### `servo_fb(self, value)`
+`ServoFbStruct` オブジェクトを設定します。スレッドセーフにアクセスされます。
+
+## メモ
+- `Singleton`メタクラスから継承しています。
+
+---
+
