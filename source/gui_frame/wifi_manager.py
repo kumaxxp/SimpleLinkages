@@ -1,14 +1,31 @@
 import socket
 from typing import Any
-from .shared_data import SharedData, ServoCmd, ServoFb, ServoCmdStruct, ServoFbStruct
+from leg_simulation.shared_data import SharedData, ServoCmd, ServoFb
+from construct import Struct, Array, Int32ul, Int32sl
 
 HOST: str = '192.168.1.100'
 PORT: int = 80
+
+ServoCmdStruct = Struct(
+    "a_angle" / Array(7, Int32ul)
+)
+
+ServoFbStruct = Struct(
+    "a_angle" / Array(7, Int32sl),
+    "a_vol" / Array(7, Int32ul)
+)
 
 class WifiManager:
     def __init__(self, shared_data: SharedData) -> None:
         super().__init__()
         self.shared_data: SharedData = shared_data
+
+        # 全て0で初期化
+        self.cmd_data = ServoCmdStruct.build({"a_angle": [0]*7})
+        self.fb_data  = ServoFbStruct.build({
+            "a_angle": [0]*7,
+            "a_vol": [0]*7
+        })
 
     def run(self) -> None:
 
@@ -20,6 +37,8 @@ class WifiManager:
 
         s: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((HOST, PORT))
+
+        print("start wifi")
 
         while True:
 

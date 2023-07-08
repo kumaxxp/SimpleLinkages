@@ -4,7 +4,7 @@ import threading
 from collections import deque
 from typing import Any, Deque, Dict, List, Tuple
 
-from construct import Struct, Array, Int32ul, Int32sl
+#from construct import Struct, Array, Int32ul, Int32sl
 
 class Singleton(type):
     _instances = {}
@@ -16,21 +16,12 @@ class Singleton(type):
 
 class ServoCmd:
     def __init__(self):
-        self.a_angle = [0]*7
+        self.a_angle:List[int] = [0] * 7
 
 class ServoFb:
-    def __init__(self, a_angle: list, a_vol: list, **kwargs):
-        self.a_angle = a_angle
-        self.a_vol = a_vol
-
-ServoCmdStruct = Struct(
-    "a_angle" / Array(7, Int32ul)
-)
-
-ServoFbStruct = Struct(
-    "a_angle" / Array(7, Int32sl),
-    "a_vol" / Array(7, Int32ul)
-)
+    def __init__(self, **kwargs):   # Add **kwargs to accept any number of keyword arguments
+        self.a_angle:List[int] = kwargs.get('a_angle', [0] * 7)
+        self.a_vol:List[int] = kwargs.get('a_vol', [0] * 7)        
 
 class SharedData(metaclass=Singleton):
     def __init__(self, queue_depth: int = 100):
@@ -42,11 +33,8 @@ class SharedData(metaclass=Singleton):
         self._servo_fb_lock: threading.Lock = threading.Lock()        
 
         # 全て0で初期化
-        self.servo_cmd = ServoCmdStruct.build({"a_angle": [0]*7})
-        self.servo_fb  = ServoFbStruct.build({
-            "a_angle": [0]*7,
-            "a_vol": [0]*7
-        })
+        self._servo_cmd = ServoCmd()
+        self._servo_fb  = ServoFb()
 
     def set_data(self, key: str, timestamp_ms: int, value: Any) -> None:
         with self.lock:
@@ -59,22 +47,21 @@ class SharedData(metaclass=Singleton):
             return list(self.data.get(key, []))
 
     @property
-    def servo_cmd(self):
+    def servo_cmd(self) -> ServoCmd:
         with self._servo_cmd_lock:
             return self._servo_cmd
 
     @servo_cmd.setter
-    def servo_cmd(self, value):
+    def servo_cmd(self, value: ServoCmd) -> None:
         with self._servo_cmd_lock:
             self._servo_cmd = value
 
     @property
-    def servo_fb(self):
+    def servo_fb(self) -> ServoFb:
         with self._servo_fb_lock:
             return self._servo_fb
 
     @servo_fb.setter
-    def servo_fb(self, value):
+    def servo_fb(self, value: ServoFb) -> None:
         with self._servo_fb_lock:
             self._servo_fb = value
-            

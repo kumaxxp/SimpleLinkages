@@ -1,5 +1,6 @@
 from leg_simulation import Robot
-from gui_frame import GraphGui, OpenGLManager, PygameManager, SharedData, PlotManager, WifiManager
+from leg_simulation.shared_data import SharedData
+from gui_frame import GraphGui, OpenGLManager, PygameManager, WifiManager
 
 import time
 import threading

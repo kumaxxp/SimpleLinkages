@@ -4,7 +4,8 @@ from pygame.locals import *
 
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, SCALE_FACTOR
 from leg_simulation import Robot
-from .shared_data import SharedData, ServoCmd, ServoFb, ServoCmdStruct, ServoFbStruct
+from leg_simulation.shared_data import SharedData, ServoFb, ServoCmd
+#from ..leg_simulation.shared_data import SharedData, ServoCmd, ServoFb, ServoCmdStruct, ServoFbStruct
 
 class PygameManager:
     def __init__(self, shared_data: SharedData) -> None:
@@ -47,10 +48,10 @@ class PygameManager:
             clock.tick(30)
             pygame.time.delay(50)
 
-            servo_fb = self.shared_data.servo_fb
+            servo_fb : ServoFbStruct = self.shared_data.servo_fb
 
-            print(servo_fb.a_angle) # 受信した角度データを表示
-            print(servo_fb.a_vol)   # 受信した電圧データを表示
+            #print(servo_fb.a_angle ) # 受信した角度データを表示
+            #print(servo_fb.a_vol)   # 受信した電圧データを表示
 
         pygame.quit()
 
