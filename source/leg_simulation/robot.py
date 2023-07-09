@@ -8,7 +8,7 @@ from .leg import Leg
 from .shared_data import SharedData, ServoFb, ServoCmd  # Assuming the shared data class is accessible like this
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, SCALE_FACTOR
 
-UPDATE_INTERVAL = 1.0  # Update interval in seconds
+UPDATE_INTERVAL = 0.01  # Update interval in seconds
 
 class Robot:
     _instance = None
@@ -55,8 +55,12 @@ class Robot:
         }
 
         # 各サーボの原点オフセットリスト
-        self.origin_offset_list = [0.0, 60.0, 180.0, 0.0, 60.0, 240.0, 0.0]        
-
+        self.origin_offset_list = [-240.0, -180.0, -360.0, -240.0, -180.0, 60.0, 0.0]
+        # 回転方向
+        # CCW:反時計回り(このロボットでは正転)
+        # CW :時計回り  (このロボットでは逆転)
+        self.revolusion_list = ["CCW", "CCW", "CCW", "CCW", "CCW", "CW"]
+        
         self.theta_angle_1 = -45
         self.theta_angle_2 = -115
         self.theta_1 = math.radians(self.theta_angle_1)
@@ -102,8 +106,8 @@ class Robot:
             self.set_angles(angle_list[0], angle_list[1])
             self.update_position()
 
-        print("angle")
-        print(angle_list)
+    #    print("angle")
+    #    print(angle_list)
             
         # Schedule the next update
         threading.Timer(UPDATE_INTERVAL, self.check_and_update).start()
@@ -136,8 +140,41 @@ class Robot:
 
         for i, pulse in enumerate(servo_data_struct.a_angle):
             angle = self.pulse_to_angle(pulse)
-            corrected_angle = angle - self.origin_offset_list[i]
+            corrected_angle = angle + self.origin_offset_list[i]
             angle_list.append(corrected_angle)
-
+        
         return angle_list
+
+    @staticmethod
+    def angle_to_pulse(angle):
+        """
+        角度をパルス数値に変換する。
+        
+        引数：
+        angle (float): 角度(度)
+        
+        戻り値:
+        int: パルス数値
+        """
+        pulse = int(angle / 0.24)
+        return pulse
     
+    def convert_angle_list_to_pulse(self, angle_list):
+        """
+        角度のリストをパルスのリストに変換する。
+        
+        引数：
+        angle_list (list): 角度（度）のリスト
+        
+        戻り値:
+        list: パルス数値のリスト
+        """
+        pulse_list = []
+        for i in range(len(angle_list)):
+            corrected_angle = angle_list[i] - self.origin_offset_list[i]
+            if corrected_angle < 0:
+                corrected_angle += 360.0
+            pulse = self.angle_to_pulse(corrected_angle)
+            pulse_list.append(pulse)
+        return pulse_list
+        

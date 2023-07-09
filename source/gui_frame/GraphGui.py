@@ -5,6 +5,9 @@ from datetime import *
 import matplotlib.dates as mdates
 
 from leg_simulation import Robot
+from leg_simulation.shared_data import SharedData, ServoCmd, ArduinoCommand
+
+from typing import List
 
 COUNT = 5
 
@@ -15,7 +18,7 @@ THETA2_MIN = -180
 THETA2_MAX = -90
 
 class GraphGui:
-    def __init__(self, shared_data):
+    def __init__(self, shared_data:SharedData):
         self.shared_data = shared_data
         self.root = tk.Tk()
         self.root.title("Time-Speed Graph")
@@ -40,6 +43,14 @@ class GraphGui:
         self.theta2_slider.set(-115)  # Set the default value for Theta2
         self.theta2_slider.pack(fill=tk.X, expand=True)
 
+        
+        self.is_auto = tk.BooleanVar()  # 追加: 手動/自動 フラグ
+        self.is_auto.set(False)  # 追加: 真 (True) で自動モード
+        self.manual_auto_button = tk.Checkbutton(self.root, text="Auto", variable=self.is_auto,
+                                                 command=self.switch_manual_auto)
+        self.manual_auto_button.pack()
+
+
         # Speed slider settings
         self.speed_slider = tk.Scale(self.root, from_=0, to=10, orient=tk.HORIZONTAL,
                                  command=self.update_speed, label="Speed")
@@ -52,12 +63,30 @@ class GraphGui:
         self.update_graph()
 
     def update_angles(self, *args):
-        theta1 = self.theta1_slider.get()
-        theta2 = self.theta2_slider.get()
+        a_angle : List[float] = [0.0] * 7
 
-        # Update the robot's angles and recalculate its position
-        self.robot.set_angles(theta1, theta2)
-        self.robot.update_position()
+        if self.is_auto.get():  # 追加: 自動モードの場合に更新
+            theta1 = self.theta1_slider.get()
+            theta2 = self.theta2_slider.get()
+
+            servo_cmd = ServoCmd()
+            if self.is_auto.get() == True & servo_cmd.command != ArduinoCommand.AUTOMATIC:
+                servo_cmd.command = ArduinoCommand.AUTOMATIC
+            elif self.is_auto.get() == False & servo_cmd.command != ArduinoCommand.MANUAL:
+                servo_cmd.command = ArduinoCommand.MANUAL
+
+            # GUIからの入力を送信する
+            a_angle[0] = theta1
+            a_angle[1] = theta2
+
+            a_angle_puls = self.robot.convert_angle_list_to_pulse(a_angle)
+            self.shared_data.servo_cmd = a_angle_puls
+
+            print(self.shared_data.servo_cmd)
+
+            # Update the robot's angles and recalculate its position
+            self.robot.set_angles(theta1, theta2)
+            self.robot.update_position()
 
     def update_speed(self, value):
         speed = float(value)
@@ -90,6 +119,14 @@ class GraphGui:
 
         # 次の更新の予約 (1000ms = 1s 後)
         self.root.after(10, self.update_graph)
+
+    def switch_manual_auto(self):  # 追加: ボタンクリック時の処理
+        if self.is_auto.get():
+            self.manual_auto_button.config(text="Auto")
+            # ここに自動処理を記述します
+        else:
+            self.manual_auto_button.config(text="Manual")
+
 
     def run(self):
         self.root.mainloop()

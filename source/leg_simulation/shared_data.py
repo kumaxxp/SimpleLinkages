@@ -3,8 +3,16 @@
 import threading
 from collections import deque
 from typing import Any, Deque, Dict, List, Tuple
+from enum import Enum
 
 #from construct import Struct, Array, Int32ul, Int32sl
+
+# Define Command Enum
+class ArduinoCommand(Enum):
+    NOTHING = 0     # なにもしない
+    MANUAL = 1      # 手動
+    AUTOMATIC = 2   # 自動
+
 
 class Singleton(type):
     _instances = {}
@@ -16,6 +24,7 @@ class Singleton(type):
 
 class ServoCmd:
     def __init__(self):
+        self.command:int = 0
         self.a_angle:List[int] = [0] * 7
 
 class ServoFb:
