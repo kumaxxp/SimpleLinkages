@@ -1,4 +1,5 @@
 import socket
+import time
 from construct import Struct, Array, Int32ub, Int32ul, Int32sl
 
 class ServoCmd:
@@ -44,24 +45,25 @@ def recv_data(s):
             
         data += chunk
 
-    parsed_data = ServoFbStruct.parse(data)
-    servo_fb = ServoFb(**parsed_data)
-    print(servo_fb.a_angle)
-    print(servo_fb.a_vol)
+    parsed_data: Any = ServoFbStruct.parse(data)
+    servo_fb: ServoFb = ServoFb(**parsed_data)
+#    print(servo_fb.a_angle)
+#    print(servo_fb.a_vol)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     # タイムアウト時間の設定
-    s.settimeout(10.0) 
+    s.settimeout(1.0) 
     s.connect((HOST, PORT))
 
     while True:
+        
+        time.sleep(0.05)    # 50ms間隔に設定。もう少し短くてもいいかも。
 
         try:
             # コマンドを送信
-            cmd_data = ServoCmdStruct.build({"command":0, "a_angle": [0]*7})
-            print(cmd_data)
+            cmd_data = ServoCmdStruct.build({"command":0, "a_angle": [1]*7})
             s.sendall(cmd_data)
 
         except Exception as e:
@@ -71,19 +73,7 @@ try:
 
         try:
             # 応答を受信
-            response_size = 56 # Arduinoから7つのunsigned intを2セット受け取るので、4*7*2=56バイトを読み込む
-            data = s.recv(response_size)
-
-            print("2")
-
-            # 受信したデータをパース
-            parsed_data = ServoFbStruct.parse(data)
-
-            # パースしたデータをServoFbオブジェクトに変換
-            servo_fb = ServoFb(**parsed_data)
-
-            print(servo_fb.a_angle) # 受信した角度データを表示
-            print(servo_fb.a_vol)   # 受信した電圧データを表示
+            recv_data(s)
 
         except KeyboardInterrupt:
             print("Terminating...")

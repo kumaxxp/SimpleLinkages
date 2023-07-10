@@ -16,6 +16,7 @@ class Singleton(type):
 
 class ServoCmd:
     def __init__(self):
+        self.command:int = 0
         self.a_angle:List[int] = [0] * 7
 
 class ServoFb:
