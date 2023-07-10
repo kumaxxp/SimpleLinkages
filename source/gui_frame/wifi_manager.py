@@ -7,6 +7,7 @@ HOST: str = '192.168.1.100'
 PORT: int = 80
 
 ServoCmdStruct = Struct(
+    "command" / Int32ul,
     "a_angle" / Array(7, Int32ul)
 )
 
@@ -56,8 +57,8 @@ class WifiManager:
                 # パースしたデータをServoFbオブジェクトに変換
                 servo_fb: ServoFb = ServoFb(**parsed_data)
 
-                #print(servo_fb.a_angle) # 受信した角度データを表示
-                #print(servo_fb.a_vol)   # 受信した電圧データを表示
+                print(servo_fb.a_angle) # 受信した角度データを表示
+                print(servo_fb.a_vol)   # 受信した電圧データを表示
 
                 self.shared_data.servo_fb = servo_fb # 共有メモリに保存
 
