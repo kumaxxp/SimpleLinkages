@@ -22,11 +22,23 @@ ServoFbStruct = Struct(
 HOST = '192.168.1.100'
 PORT = 80
 
-# サーボコマンドオブジェクトの作成
-servo_cmd = ServoCmd()
+def send_data(s):
+    while True:
+        servo_cmd = ServoCmd()
+        cmd_data = ServoCmdStruct.build({"a_angle": servo_cmd.a_angle})
+        s.sendall(cmd_data)
+        time.sleep(1)
+        print("send")
 
-# Constructを使いサーボコマンドオブジェクトをバイト列に変換
-cmd_data = ServoCmdStruct.build({"a_angle": servo_cmd.a_angle})
+
+def recv_data(s):
+    response_size = 56
+    while True:
+        data = s.recv(response_size)
+        parsed_data = ServoFbStruct.parse(data)
+        servo_fb = ServoFb(**parsed_data)
+        print(servo_fb.a_angle)
+        print(servo_fb.a_vol)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
