@@ -67,7 +67,7 @@ class WifiManager:
 
             while True:
 
-                time.sleep(0.05)    # 50ms間隔に設定。もう少し短くてもいいかも。
+                time.sleep(0.01)    # 50ms間隔に設定。もう少し短くてもいいかも。
 
                 try:
                     # コマンドを送信
