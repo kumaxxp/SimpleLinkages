@@ -28,17 +28,17 @@ class Robot:
         self.scale_factor = SCALE_FACTOR
 
         self.linkage5bar_params = {
-            'b': 0.020,
-            'l1': 0.015,
+            'b':  0.03009,
+            'l1': 0.025,
             'l2': 0.025,
-            'm1': 0.040,
-            'm2': 0.025
+            'm1': 0.050,
+            'm2': 0.035
         }
 
         self.linkage4bar_params = {
-            'a': 0.020,
-            'b': 0.050,
-            'e': 0.040
+            'a': 0.025,
+            'b': 0.080,
+            'e': 0.080
         }
 
         self.link_list = {
