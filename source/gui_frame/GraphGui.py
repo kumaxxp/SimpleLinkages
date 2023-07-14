@@ -37,7 +37,7 @@ class GraphGui:
         # Angle theta2 slider settings
         self.theta2_slider = tk.Scale(self.root, from_=THETA2_MIN, to=THETA2_MAX, orient=tk.HORIZONTAL,
                                  command=self.update_angles, label="Theta2")
-        self.theta2_slider.set(-115)  # Set the default value for Theta2
+        self.theta2_slider.set(-180)  # Set the default value for Theta2
         self.theta2_slider.pack(fill=tk.X, expand=True)
 
         # Speed slider settings

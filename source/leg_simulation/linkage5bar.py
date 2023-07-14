@@ -17,7 +17,7 @@ class Linkage5Bar:
         self.theta_M1 = None
         self.theta_M2 = None
 
-        self.distance_B2_X = 0.0
+        self.distance_B_M2 = 0.0
 
     @staticmethod
     def circle_intersection(c1, r1, c2, r2):
@@ -76,7 +76,7 @@ class Linkage5Bar:
         # Compute the distance between point B2 and X
         self.distance_B2_X = np.sqrt((self.B2[0] - X_x)**2 + (self.B2[1] - X_y)**2)
 
-        if self.distance_B2_X >= 0.030:
+        if self.distance_B2_X >= self.b:
             # Save all positions and angles in the Positions member variable
             self.Positions = {
                 'B1': (self.B1[0], self.B1[1]),

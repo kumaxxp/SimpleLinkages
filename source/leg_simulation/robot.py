@@ -28,16 +28,16 @@ class Robot:
         self.scale_factor = SCALE_FACTOR
 
         self.linkage5bar_params = {
-            'b':  0.03009,
-            'l1': 0.025,
+            'b':  0.04009,
+            'l1': 0.045,
             'l2': 0.025,
-            'm1': 0.050,
-            'm2': 0.035
+            'm1': 0.070,
+            'm2': 0.055
         }
 
         self.linkage4bar_params = {
             'a': 0.025,
-            'b': 0.080,
+            'b': 0.100,
             'e': 0.080
         }
 
@@ -91,6 +91,9 @@ class Robot:
 
     def get_distance_B2_X(self):
         return self.leg.get_distance_B2_X()
+
+    def get_distance_B_M2(self):
+        return self.leg.get_distance_B_M2()
 
     def check_and_update(self):
         # Check new angles from the shared data

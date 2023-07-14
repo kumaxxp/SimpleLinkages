@@ -1,10 +1,12 @@
 from .linkage5bar import Linkage5Bar
 from .linkage4bar import Linkage4Bar
+import numpy as np
 
 class Leg:
     def __init__(self, linkage5bar_params, linkage4bar_params):
         self.linkage5bar = Linkage5Bar(linkage5bar_params)
         self.linkage4bar = Linkage4Bar(linkage4bar_params, self.linkage5bar)
+        self.distance_B_M2 = 0.0
 
     def compute_endeffector_position(self, theta_1, theta_2):
 
@@ -18,6 +20,9 @@ class Leg:
         else:
             positions_4bar = self.linkage4bar.get_positions()
             endeffector_position = positions_4bar['E']
+
+        # 調査のためにBとM2の距離を計算
+        self.distance_B_M2 = np.sqrt((positions_4bar["B"][0] - positions_5bar["M2"][0])**2 + (positions_4bar["B"][1] - positions_5bar["M2"][1])**2)
 
         return endeffector_position
 
@@ -47,4 +52,7 @@ class Leg:
 
     def get_distance_B2_X(self):
         return self.linkage5bar.get_distance_B2_X()
+
+    def get_distance_B_M2(self):
+        return self.distance_B_M2
 
