@@ -58,7 +58,9 @@ class PygameManager:
     def draw_2d(self, screen, font):
         positions = self.robot.get_positions()
 
-        transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height) for key, coord in positions.items()}
+        offset = (0, -400)
+
+        transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height, offset) for key, coord in positions.items()}
 
         links_coordinates = self.create_links_2D(self.link_list, transformed_coordinates)
 
@@ -122,8 +124,25 @@ class PygameManager:
                 link_coordinates.append((coord1, coord2))
         return link_coordinates
 
-    def convert_coordinates(self, coord, screen_width, screen_height):
+    def convert_coordinates(self, coord, screen_width, screen_height, offset=(0, 0)):
+        """
+        与えられたデカルト座標を画面上で表示するためのピクセル座標に変換します。
+        
+        パラメータ:
+            coord: xとy座標を含むタプル
+            screen_width: 画面の幅(ピクセル単位)
+            screen_height: 画面の高さ(ピクセル単位)
+            offset: 座標に適用されるxとyオフセットのタプル（オプション）。デフォルトは (0,0)
+            
+        戻り値:
+            変換されたx, y座標のタプル
+        """
+
         x, y = coord
-        x_transformed = int((x * self.scale_factor) + screen_width // 2)
-        y_transformed = int((-y * self.scale_factor) + screen_height // 2)
+        
+        # x を変換し、y を反転（スクリーン座標は左上が原点）
+        # スケールファクターでスケーリングして、画面サイズの半分とオフセットを加算します。
+        # ピクセル値は整数である必要があります。
+        x_transformed = int((x * self.scale_factor) + screen_width // 2 + offset[0])
+        y_transformed = int((-y * self.scale_factor) + screen_height // 2 + offset[1])
         return x_transformed, y_transformed

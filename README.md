@@ -257,3 +257,15 @@ SharedData o-d- ServoFbStruct : Contains >
 
 ---
 
+## カーボン部品の発注
+
+kaka_chan@sunlikeec.com
+info@sunlikeec.com
+
+Request for Carbon Cutting
+
+Dear manager
+please cut this files, and please make pi
+3mm
+sketch.dxf 2pcs.
+
