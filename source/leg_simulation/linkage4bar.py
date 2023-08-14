@@ -20,6 +20,9 @@ class Linkage4Bar:
             "E": (0, 0)
         }
 
+        self.B = (0, 0)
+        self.E = (0, 0)
+
 
     def update_positions(self):
         A_x, A_y = self.linkage5bar.B1

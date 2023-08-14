@@ -29,16 +29,24 @@ class Robot:
 
         self.linkage5bar_params = {
             'b':  0.04009,
-            'l1': 0.045,
+            'l1': 0.025,
             'l2': 0.025,
-            'm1': 0.070,
-            'm2': 0.055
+            'm1': 0.050,
+            'm2': 0.035
         }
 
         self.linkage4bar_params = {
             'a': 0.025,
-            'b': 0.100,
-            'e': 0.080
+            'b': 0.080,
+            'e': 0.025
+        }
+
+        self.linkagehoot_params = {
+            'e': 0.025,
+            'f': 0.0375,
+            'g': 0.040,
+            'h-min': 0.080,
+            'h-max': 0.100
         }
 
         self.link_list = {
@@ -62,7 +70,7 @@ class Robot:
         self.theta_1 = math.radians(self.theta_angle_1)
         self.theta_2 = math.radians(self.theta_angle_2)
 
-        self.leg = Leg(self.linkage5bar_params, self.linkage4bar_params)
+        self.leg = Leg(self.linkage5bar_params, self.linkage4bar_params, self.linkagehoot_params)
         endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2)
 
          # Initialize SharedData

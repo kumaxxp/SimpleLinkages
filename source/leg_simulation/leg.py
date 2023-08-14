@@ -4,7 +4,7 @@ from .linkagehoot import LinkageHoot
 import numpy as np
 
 class Leg:
-    def __init__(self, linkage5bar_params, linkage4bar_params):
+    def __init__(self, linkage5bar_params, linkage4bar_params, linkagehoot_params):
         self.linkage5bar = Linkage5Bar(linkage5bar_params)
         self.linkage4bar = Linkage4Bar(linkage4bar_params, self.linkage5bar)
         self.linkagehoot = LinkageHoot(linkagehoot_params, self.linkage4bar)
