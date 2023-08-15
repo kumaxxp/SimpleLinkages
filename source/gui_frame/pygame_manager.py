@@ -109,7 +109,7 @@ class PygameManager:
         # リミットなどの情報
         distance = distance_GH
         if distance != None:
-            label_text = f"{'Distance G-H'}({distance:.4f}"
+            label_text = f"{'Distance G-H,G-Ht'}({distance:.4f}"
             label = font.render(label_text, True, (255, 255, 255))
             screen.blit(label, (0 + 10, 0 + 10))
 
