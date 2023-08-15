@@ -18,12 +18,14 @@ class Leg:
             M1 = positions_5bar["M1"]
 
             positions_4bar = self.linkage4bar.compute_all_positions(M1, X, theta_1)
-            endeffector_position = positions_4bar['E']
+            angles_4bar = self.linkage4bar.get_angles()
+            #endeffector_position = positions_4bar['E']
 
             B = positions_4bar["B"]
-            angle_AX = positions_4bar["angle_AX"]
+            angle_AX = angles_4bar["angle_AX"]
 
-        #    positions_hoot = self.linkagehoot.compute_all_positions(B, theta_1, angle_AX)
+            positions_hoot = self.linkagehoot.compute_all_positions(B, theta_1, angle_AX)
+            endeffector_position = positions_hoot["E"]
 
         else:
             positions_4bar = self.linkage4bar.get_positions()

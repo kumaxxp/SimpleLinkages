@@ -4,6 +4,7 @@ import numpy as np
 class Linkage4Bar:
     def __init__(self, initial_parameters, linkage5bar_instance):
         self.Positions = {}
+        self.Angles = {}
 
         self.a = initial_parameters['a']
         self.b = initial_parameters['b']
@@ -19,6 +20,11 @@ class Linkage4Bar:
             "D": (0, 0),
             "E": (0, 0)
         }
+
+        self.Angles = {
+            "angle_AX": 0.0
+        }
+
 
     # ↓この関数は使っていないかつ、計算方法が間違っている
     # compute_all_positions側を使う必要がある
@@ -65,7 +71,10 @@ class Linkage4Bar:
             "B": (B_x, B_y),
             "C": (C_x, C_y),
             "D": (D_x, D_y),
-            "E": (E_x, E_y),
+            "E": (E_x, E_y)
+        }
+
+        self.Angles = {
             "angle_AX": angle_AX  # AX の角度を含むように更新
         }
 
@@ -75,3 +84,5 @@ class Linkage4Bar:
     def get_positions(self):
         return self.Positions
 
+    def get_angles(self):
+        return self.Angles
