@@ -75,7 +75,16 @@ class Robot:
             ('It', 'Kt'),
             ('G', 'H'),
             ('G', 'Ht'),
-            ('F', 'H')
+            ('F', 'H'),
+            ('F', 'Ht')
+        }
+
+        self.link_red_list = {
+            ('F', 'Kt'),
+            ('Jt', 'Kt'),
+            ('It', 'Kt'),
+            ('G', 'Ht'),
+            ('F', 'Ht')
         }
 
         # 各サーボの原点オフセットリスト
@@ -102,7 +111,10 @@ class Robot:
     
     def get_link_list(self) -> List:
         return self.link_list
-    
+
+    def get_link_red_list(self) -> List:
+        return self.link_red_list
+
     def set_angles(self, theta_angle_1, theta_angle_2):
         with self.lock:
             self.theta_angle_1 = theta_angle_1

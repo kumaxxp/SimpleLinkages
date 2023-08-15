@@ -23,6 +23,7 @@ class PygameManager:
 
         self.robot = Robot()  # robot インスタンスを初期化
         self.link_list = self.robot.get_link_list()
+        self.link_red_list = self.robot.get_link_red_list()
 
     def run(self):
         pygame.init()
@@ -64,6 +65,7 @@ class PygameManager:
         transformed_coordinates = {key: self.convert_coordinates(coord, self.screen_width, self.screen_height, offset) for key, coord in positions.items()}
 
         links_coordinates = self.create_links_2D(self.link_list, transformed_coordinates)
+        links_red_coordinates = self.create_links_2D(self.link_red_list, transformed_coordinates)
 
         # ここから、pygameを使った2D表示を行います
         origin = np.array([self.screen_width // 2, self.screen_height // 2])
@@ -104,10 +106,15 @@ class PygameManager:
         for link in links_coordinates:
             pygame.draw.line(screen, (0, 255, 0), link[0], link[1], 2)
 
-        distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
+        # リンクを描画
+        for link in links_red_coordinates:
+            pygame.draw.line(screen, (255, 0, 0), link[0], link[1], 2)
+
+        #distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
+        distance_GHt = math.sqrt((positions['G'][0]-positions['Ht'][0])**2 + (positions['G'][1]-positions['Ht'][1])**2)
 
         # リミットなどの情報
-        distance = distance_GH
+        distance = distance_GHt
         if distance != None:
             label_text = f"{'Distance G-H,G-Ht'}({distance:.4f}"
             label = font.render(label_text, True, (255, 255, 255))

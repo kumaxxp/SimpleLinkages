@@ -53,7 +53,7 @@ class LinkageHoot:
         F_y = E_y + self.f * math.sin(rad_EF)
         F = (F_x, F_y)
 
-        print(self.angle_E, math.degrees(theta_1), math.degrees(rad_EF))
+        #print(self.angle_E, math.degrees(theta_1), math.degrees(rad_EF))
 
         # 頂点Gの座標を計算する
         # 頂点Bから角度AXの延長上
@@ -159,7 +159,10 @@ class LinkageHoot:
             angle_IK = np.arctan2(vec_IK[1], vec_IK[0])
 
             # Hの座標をFから割り出す
-            rad_F = math.radians(self.angle_F - angle_IK)
+            rad_F = math.radians(self.angle_F - (180.0 - math.degrees(angle_IK)))
+            #rad_F = math.radians(self.angle_F) - angle_IK
+
+            print(self.angle_F, math.degrees(angle_IK))
             Ht_x = F_x + self.fh * math.cos(rad_F)
             Ht_y = F_y + self.fh * math.sin(rad_F)
 
