@@ -20,10 +20,8 @@ class Linkage4Bar:
             "E": (0, 0)
         }
 
-        self.B = (0, 0)
-        self.E = (0, 0)
-
-
+    # ↓この関数は使っていないかつ、計算方法が間違っている
+    # compute_all_positions側を使う必要がある
     def update_positions(self):
         A_x, A_y = self.linkage5bar.B1
         D_x, D_y = self.linkage5bar.B2
@@ -51,6 +49,9 @@ class Linkage4Bar:
         B_x = A_x + unit_vec_AX[0] * self.b
         B_y = A_y + unit_vec_AX[1] * self.b
 
+        # ベクトルAXの角度を計算
+        angle_AX = np.arctan2(X_y - A_y, X_x - A_x)
+
         # 頂点Cの座標を計算
         C_x = B_x + self.a * np.cos(theta_1)
         C_y = B_y + self.a * np.sin(theta_1)
@@ -64,7 +65,8 @@ class Linkage4Bar:
             "B": (B_x, B_y),
             "C": (C_x, C_y),
             "D": (D_x, D_y),
-            "E": (E_x, E_y)
+            "E": (E_x, E_y),
+            "angle_AX": angle_AX  # AX の角度を含むように更新
         }
 
         # 結果をリターンする

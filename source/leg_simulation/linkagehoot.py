@@ -16,6 +16,7 @@ class LinkageHoot:
         self.e = initial_parameters['e']
         self.f = initial_parameters['f']
         self.g = initial_parameters['g']
+        self.angle_E = 142.1
 
         # 初期値
         self.Positions = {
@@ -26,14 +27,38 @@ class LinkageHoot:
             "H":(0, 0),
         }
 
-        self.update_positions()
+
+    def compute_all_positions(self, B: tuple, theta_1: float, angle_AX: float):
+        B_x, B_y = B
+
+        # 頂点Dの座標を計算
+        E_x = B_x + self.e * np.cos(theta_1)
+        E_y = B_y + self.e * np.sin(theta_1)
+
+        # 頂点Fの座標を計算
+        # 角度を足して新たな座標の角度を得る
+        angle_EF = theta_1 + self.angle_E
+        F_x = E_x + self.f * math.cos(angle_EF)
+        F_y = E_y + self.f * math.sin(angle_EF)
+
+        # 頂点Gの座標を計算する
+        # 頂点Bから角度AXの延長上
+        G_x = B_x + self.g * math.cos(angle_AX)
+        G_y = B_y + self.g * math.sin(angle_AX)
+
+        # この関数で、足底の点の角度を計算する
 
 
-    def update_positions(self):
-        B_x, B_y = self.linkage4bar.B
-        E_x, E_y = self.linkage4bar.E
+        self.Positions = {
+            "B": (B_x, B_y),
+            "E": (E_x, E_y),
+            "F": (F_x, F_y),
+            "G": (G_x, G_y)
+        }
 
-        F_x, F_y = self.calculate_point_with_angle_phi(self.linkage4bar.E, self.linkage4bar.B, 143.1, self.f)
+        # 結果をリターンする
+        return self.Positions
+
 
     def calculate_point_with_angle_phi(self, start_point: tuple, ref_point: tuple,
                             angle: float, distance: float) -> tuple:
@@ -73,6 +98,8 @@ class LinkageHoot:
 
         return (new_x, new_y)        
 
+    def get_positions(self):
+        return self.Positions
 
 
 
