@@ -16,7 +16,7 @@ class LinkageHoot:
         self.e = initial_parameters['e']
         self.f = initial_parameters['f']
         self.g = initial_parameters['g']
-        self.angle_E = 142.1
+        self.angle_E = 119.7
 
         # 初期値
         self.Positions = {
@@ -28,18 +28,21 @@ class LinkageHoot:
         }
 
 
-    def compute_all_positions(self, B: tuple, theta_1: float, angle_AX: float):
+    def compute_all_positions(self, B: tuple, C: tuple, theta_1: float, angle_AX: float):
         B_x, B_y = B
+        C_x, C_y = C
 
         # 頂点Dの座標を計算
-        E_x = B_x + self.e * np.cos(theta_1)
-        E_y = B_y + self.e * np.sin(theta_1)
+        E_x = C_x + self.e * np.cos(theta_1)
+        E_y = C_y + self.e * np.sin(theta_1)
 
         # 頂点Fの座標を計算
         # 角度を足して新たな座標の角度を得る
-        angle_EF = theta_1 + self.angle_E
-        F_x = E_x + self.f * math.cos(angle_EF)
-        F_y = E_y + self.f * math.sin(angle_EF)
+#        angle_EF = theta_1 + self.angle_E
+        print(angle_AX, theta_1)
+        rad_EF = math.radians(self.angle_E) - angle_AX
+        F_x = E_x + self.f * math.cos(rad_EF)
+        F_y = E_y + self.f * math.sin(rad_EF)
 
         # 頂点Gの座標を計算する
         # 頂点Bから角度AXの延長上

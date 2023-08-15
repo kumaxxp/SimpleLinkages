@@ -22,9 +22,10 @@ class Leg:
             #endeffector_position = positions_4bar['E']
 
             B = positions_4bar["B"]
+            C = positions_4bar["C"]
             angle_AX = angles_4bar["angle_AX"]
 
-            positions_hoot = self.linkagehoot.compute_all_positions(B, theta_1, angle_AX)
+            positions_hoot = self.linkagehoot.compute_all_positions(B, C, theta_1, angle_AX)
             endeffector_position = positions_hoot["E"]
 
         else:
@@ -55,7 +56,7 @@ class Leg:
         return result_positions
     
     def get_positions(self):
-        return { **self.linkage5bar.get_positions() , **self.linkage4bar.get_positions()}
+        return { **self.linkage5bar.get_positions() , **self.linkage4bar.get_positions() , **self.linkagehoot.get_positions()}
 
     def inverse_kinematics(self, target_position: tuple) -> dict:
         pass  # To be implemented
