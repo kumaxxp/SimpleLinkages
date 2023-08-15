@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+import math
 from pygame.locals import *
 
 from config import WINDOW_WIDTH, WINDOW_HEIGHT, SCALE_FACTOR
@@ -103,10 +104,12 @@ class PygameManager:
         for link in links_coordinates:
             pygame.draw.line(screen, (0, 255, 0), link[0], link[1], 2)
 
+        distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
+
         # リミットなどの情報
-        distance = self.robot.get_distance_B_M2()
+        distance = distance_GH
         if distance != None:
-            label_text = f"{'Distance M2-B'}({distance:.4f}"
+            label_text = f"{'Distance G-H'}({distance:.4f}"
             label = font.render(label_text, True, (255, 255, 255))
             screen.blit(label, (0 + 10, 0 + 10))
 

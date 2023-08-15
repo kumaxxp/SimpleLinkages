@@ -22,7 +22,7 @@ class LinkageHoot:
         self.fh= initial_parameters['fh']
         self.angle_E = 119.7
         self.angle_F = 42.0
-        self.distance = 0.020
+        self.distance = -0.180
 
         # 初期値
         self.Positions = {
@@ -112,54 +112,65 @@ class LinkageHoot:
 
         return self.potisions_base
 
-    def calculate_toe_points(self, F: tuple, distance: float):
+    def calculate_toe_points(self, F: tuple, ground: float):
         """
         足底が浮いていて、つま先だけが地面に接している場合の座標を計算する
-        distanceがFから地面までの距離で、これはkよりも大きくなければならない
+        groundがFから地面までの距離で、これはkよりも大きくなければならない
         """
         F_x, F_y = F
 
-        # Ifの座標を計算する
-        It_y = F_y - distance
-        D = math.sqrt(self.k**2 + self.i**2)
-        It_x = math.sqrt(D**2 - distance**2) + F_x
-        It = (It_x, It_y)
+        if (F_y - self.k) < ground:
+            # 点Kが設置しているなら、この処理は行わない
+            positions_toe = {}
 
-        # Ktの座標を計算する。
-        # F,Itから円を描いて交点をKtとします。
-        # KtはF_Xよりもx座標が小さい方を採用。
-        q1, q2 = self.circle_intersection(np.array([F_x, F_y]), self.k, np.array([It_x, It_y]), self.i)
-
-        if (q1[0] <= F_x):
-            Kt = q1
+            return positions_toe
+        
         else:
-            Kt = q2
+            # 点Kが設置していないなら、つま先を地面につける
 
-        Kt_x, Kt_y = Kt
+            # Ifの座標を計算する
+            It_y = ground
+            distance = F_y - ground
+            
+            D = math.sqrt(self.k**2 + self.i**2)
+            It_x = math.sqrt(D**2 - distance**2) + F_x
+            It = (It_x, It_y)
 
-        # Jtの座標を計算する
-        vec_IK = (Kt_x - It_x, Kt_y - It_y)
-        norm_IK = np.linalg.norm(vec_IK)
-        unit_vec_IK = (vec_IK[0] / norm_IK, vec_IK[1] / norm_IK)
-        Jt_x = Kt_x + unit_vec_IK[0] * self.j
-        Jt_y = Kt_y + unit_vec_IK[1] * self.j
+            # Ktの座標を計算する。
+            # F,Itから円を描いて交点をKtとします。
+            # KtはF_Xよりもx座標が小さい方を採用。
+            q1, q2 = self.circle_intersection(np.array([F_x, F_y]), self.k, np.array([It_x, It_y]), self.i)
 
-        # ベクトルIKの角度を計算
-        angle_IK = np.arctan2(vec_IK[1], vec_IK[0])
+            if (q1[0] <= F_x):
+                Kt = q1
+            else:
+                Kt = q2
 
-        # Hの座標をFから割り出す
-        rad_F = math.radians(self.angle_F - angle_IK)
-        Ht_x = F_x + self.fh * math.cos(rad_F)
-        Ht_y = F_y + self.fh * math.sin(rad_F)
+            Kt_x, Kt_y = Kt
 
-        self.positions_toe = {
-            "Ht": (Ht_x, Ht_y),
-            "It": (It_x, It_y),
-            "Jt": (Jt_x, Jt_y),
-            "Kt": (Kt_x, Kt_y)
-        }
+            # Jtの座標を計算する
+            vec_IK = (Kt_x - It_x, Kt_y - It_y)
+            norm_IK = np.linalg.norm(vec_IK)
+            unit_vec_IK = (vec_IK[0] / norm_IK, vec_IK[1] / norm_IK)
+            Jt_x = Kt_x + unit_vec_IK[0] * self.j
+            Jt_y = Kt_y + unit_vec_IK[1] * self.j
 
-        return self.positions_toe
+            # ベクトルIKの角度を計算
+            angle_IK = np.arctan2(vec_IK[1], vec_IK[0])
+
+            # Hの座標をFから割り出す
+            rad_F = math.radians(self.angle_F - angle_IK)
+            Ht_x = F_x + self.fh * math.cos(rad_F)
+            Ht_y = F_y + self.fh * math.sin(rad_F)
+
+            self.positions_toe = {
+                "Ht": (Ht_x, Ht_y),
+                "It": (It_x, It_y),
+                "Jt": (Jt_x, Jt_y),
+                "Kt": (Kt_x, Kt_y)
+            }
+
+            return self.positions_toe
 
 
 
