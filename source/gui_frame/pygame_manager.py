@@ -24,6 +24,7 @@ class PygameManager:
         self.robot = Robot()  # robot インスタンスを初期化
         self.link_list = self.robot.get_link_list()
         self.link_red_list = self.robot.get_link_red_list()
+        self.link_blue_list = self.robot.get_link_blue_list()
 
     def run(self):
         pygame.init()
@@ -66,6 +67,7 @@ class PygameManager:
 
         links_coordinates = self.create_links_2D(self.link_list, transformed_coordinates)
         links_red_coordinates = self.create_links_2D(self.link_red_list, transformed_coordinates)
+        links_blue_coordinates = self.create_links_2D(self.link_blue_list, transformed_coordinates)
 
         # ここから、pygameを使った2D表示を行います
         origin = np.array([self.screen_width // 2, self.screen_height // 2])
@@ -96,7 +98,7 @@ class PygameManager:
 
             pygame.draw.circle(screen, (255, 0, 0), coord, 5)
             
-            if(vertex_name != 'A'):
+            if(vertex_name != 'A' and vertex_name != 'H' and vertex_name != 'I' and vertex_name != 'J' and vertex_name != 'K'):
                 original_coord_mm = (positions[vertex_name][0] * 1000, positions[vertex_name][1] * 1000)
                 label_text = f"{vertex_name} ({original_coord_mm[0]:.2f}, {original_coord_mm[1]:.2f})"
                 label = font.render(label_text, True, (255, 255, 255))
@@ -110,16 +112,24 @@ class PygameManager:
         for link in links_red_coordinates:
             pygame.draw.line(screen, (255, 0, 0), link[0], link[1], 2)
 
+        # リンクを描画
+        for link in links_blue_coordinates:
+            pygame.draw.line(screen, (0, 0, 255), link[0], link[1], 2)
+
         if 'Ht' not in positions:
             distance_GHt = None
         else:
             #distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
             distance_GHt = math.sqrt((positions['G'][0]-positions['Ht'][0])**2 + (positions['G'][1]-positions['Ht'][1])**2)
 
+        if 'Hn' not in positions:
+            distance_GHn = None
+        else:
+            distance_GHn = math.sqrt((positions['G'][0]-positions['Hn'][0])**2 + (positions['G'][1]-positions['Hn'][1])**2)
+
         # リミットなどの情報
-        distance = distance_GHt
-        if distance != None:
-            label_text = f"{'Distance G-H,G-Ht'}({distance:.4f}"
+        if distance_GHn != None and distance_GHt != None:
+            label_text = f"{'Distance G-H,G-Ht'}({distance_GHt:.4f}, {distance_GHn:.4f}"
             label = font.render(label_text, True, (255, 255, 255))
             screen.blit(label, (0 + 10, 0 + 10))
 

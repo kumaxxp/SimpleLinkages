@@ -67,15 +67,15 @@ class Robot:
             ('B', 'E'),
             ('E', 'F'),
             ('B', 'G'),
-            ('F', 'K'),
-            ('J', 'K'),
-            ('I', 'K'),
+            #('F', 'K'),
+            #('J', 'K'),
+            #('I', 'K'),
             ('F', 'Kt'),
             ('Jt', 'Kt'),
             ('It', 'Kt'),
-            ('G', 'H'),
+            #('G', 'H'),
             ('G', 'Ht'),
-            ('F', 'H'),
+            #('F', 'H'),
             ('F', 'Ht')
         }
 
@@ -85,6 +85,14 @@ class Robot:
             ('It', 'Kt'),
             ('G', 'Ht'),
             ('F', 'Ht')
+        }
+
+        self.link_blue_list = {
+            ('F', 'Kn'),
+            ('Jn', 'Kn'),
+            ('In', 'Kn'),
+            ('G', 'Hn'),
+            ('F', 'Hn')
         }
 
         # 各サーボの原点オフセットリスト
@@ -115,6 +123,9 @@ class Robot:
 
     def get_link_red_list(self) -> List:
         return self.link_red_list
+
+    def get_link_blue_list(self) -> List:
+        return self.link_blue_list
 
     def set_angles(self, theta_angle_1, theta_angle_2):
         with self.lock:

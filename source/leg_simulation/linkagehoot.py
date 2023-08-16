@@ -42,7 +42,7 @@ class LinkageHoot:
 
         self.base_positions = {}       
         self.toe_positions = {}
-
+        self.no_load_positions = {}
 
 
     def compute_all_positions(self, B: tuple, C: tuple, theta_1: float, angle_AX: float, ground: float):
@@ -79,6 +79,11 @@ class LinkageHoot:
         if toe_positions != None:
             self.toe_positions = toe_positions
 
+        # 無負荷の角度を計算する
+        no_load_positions = self.calculate_no_load_points(F, G)
+        if no_load_positions != None:
+            self.no_load_positions = no_load_positions
+
         positions = {
             "B": (B_x, B_y),
             "E": (E_x, E_y),
@@ -88,7 +93,7 @@ class LinkageHoot:
 
         print(self.toe_positions)
 
-        self.Positions = { **positions, **self.base_positions, **self.toe_positions}
+        self.Positions = { **positions, **self.base_positions, **self.toe_positions, **self.no_load_positions}
 
         # 結果をリターンする
         return self.Positions
@@ -125,6 +130,64 @@ class LinkageHoot:
         }
 
         return self.potisions_base
+    
+
+    def calculate_no_load_points(self, F: tuple, G: tuple):
+        """
+        無負荷状態でGHのバネ部分が最大長の状態のリンクを計算する
+        無負荷状態と、接地状態を比較して、たまっているエネルギーを可視化する
+        """
+        F_x, F_y = F
+        G_x, G_y = G
+
+        q1, q2 = self.circle_intersection(np.array([F_x, F_y]), self.fh, np.array([G_x, G_y]), self.h_max)
+
+        if (q1[0] >= q2[0]):
+            H = q1
+        else:
+            H = q2
+
+        H_x, H_y = H
+
+        # 線分HFの角度を計算する
+        vec_HF = (F_x - H_x, F_y - H_y)
+        rad_HF = np.arctan2(vec_HF[1], vec_HF[0])
+        angle_HF = math.degrees(rad_HF)
+
+        print("angle HF " ,angle_HF)
+
+        # 線分FKの角度を計算する
+        angle_FK = angle_HF + (180.0 - (self.angle_F + 90.0))
+        rad_FK = math.radians(angle_FK)
+
+        # 点Kを計算する
+        K_x = F_x + self.k * math.cos(rad_FK)
+        K_y = F_y + self.k * math.sin(rad_FK)
+        K = (K_x, K_y)
+
+        # 点I,Jを計算する
+        rad_KJ = rad_FK - math.pi/2
+        rad_KI = rad_FK + math.pi/2
+
+        I_x = K_x + self.i * math.cos(rad_KI)
+        I_y = K_y + self.i * math.sin(rad_KI)
+        I = (I_x, I_y)
+
+        J_x = K_x + self.j * math.cos(rad_KJ)
+        J_y = K_y + self.j * math.sin(rad_KJ)
+        J = (J_x, J_y)
+
+        self.positions_no_load = {
+            "Hn": (H_x, H_y),
+            "In": (I_x, I_y),
+            "Jn": (J_x, J_y),
+            "Kn": (K_x, K_y)
+        }
+
+        return self.positions_no_load
+
+
+
 
     def calculate_toe_points(self, F: tuple, G: tuple, ground: float):
         """
