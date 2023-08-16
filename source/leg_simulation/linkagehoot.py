@@ -16,6 +16,10 @@ class LinkageHoot:
         self.e = initial_parameters['e']
         self.f = initial_parameters['f']
         self.g = initial_parameters['g']
+
+        self.h_min = initial_parameters['h-min']
+        self.h_max = initial_parameters['h-max']
+
         self.i = initial_parameters['i']
         self.j = initial_parameters['j']
         self.k = initial_parameters['k']
@@ -35,6 +39,10 @@ class LinkageHoot:
             "J":(0, 0),
             "K":(0, 0),
         }
+
+        self.base_positions = {}       
+        self.toe_positions = {}
+
 
 
     def compute_all_positions(self, B: tuple, C: tuple, theta_1: float, angle_AX: float):
@@ -59,13 +67,18 @@ class LinkageHoot:
         # 頂点Bから角度AXの延長上
         G_x = B_x + self.g * math.cos(angle_AX)
         G_y = B_y + self.g * math.sin(angle_AX)
+        G = (G_x, G_y)
 
         # 足底の点の角度を計算する
-        base_points = self.calculate_base_points(F)
+        base_positions = self.calculate_base_points(F)
+        if base_positions != None:
+            self.base_positions = base_positions        
 
         # つま先の角度を計算する
         # 暫定的にdistanceを20mmに固定する
-        toe_points = self.calculate_toe_points(F, self.distance)
+        toe_positions = self.calculate_toe_points(F, G, self.distance)
+        if toe_positions != None:
+            self.toe_positions = toe_positions
 
         positions = {
             "B": (B_x, B_y),
@@ -74,7 +87,9 @@ class LinkageHoot:
             "G": (G_x, G_y)
         }
 
-        self.Positions = { **positions, **base_points, **toe_points}
+        print(self.toe_positions)
+
+        self.Positions = { **positions, **self.base_positions, **self.toe_positions}
 
         # 結果をリターンする
         return self.Positions
@@ -112,7 +127,7 @@ class LinkageHoot:
 
         return self.potisions_base
 
-    def calculate_toe_points(self, F: tuple, ground: float):
+    def calculate_toe_points(self, F: tuple, G: tuple, ground: float):
         """
         足底が浮いていて、つま先だけが地面に接している場合の座標を計算する
         groundがFから地面までの距離で、これはkよりも大きくなければならない
@@ -121,9 +136,7 @@ class LinkageHoot:
 
         if (F_y - self.k) < ground:
             # 点Kが設置しているなら、この処理は行わない
-            positions_toe = {}
-
-            return positions_toe
+            return None
         
         else:
             # 点Kが設置していないなら、つま先を地面につける
@@ -133,6 +146,9 @@ class LinkageHoot:
             distance = F_y - ground
             
             D = math.sqrt(self.k**2 + self.i**2)
+            if D < distance:
+                return None
+            
             It_x = math.sqrt(D**2 - distance**2) + F_x
             It = (It_x, It_y)
 
@@ -162,16 +178,24 @@ class LinkageHoot:
             rad_F = math.radians(self.angle_F - (180.0 - math.degrees(angle_IK)))
             #rad_F = math.radians(self.angle_F) - angle_IK
 
-            print(self.angle_F, math.degrees(angle_IK))
+            #print(self.angle_F, math.degrees(angle_IK))
             Ht_x = F_x + self.fh * math.cos(rad_F)
             Ht_y = F_y + self.fh * math.sin(rad_F)
 
-            self.positions_toe = {
-                "Ht": (Ht_x, Ht_y),
-                "It": (It_x, It_y),
-                "Jt": (Jt_x, Jt_y),
-                "Kt": (Kt_x, Kt_y)
-            }
+            G_x, G_y = G
+            distance_GHt = math.sqrt((G_x-Ht_x)**2 + (G_y-Ht_y)**2)
+
+            if ((distance_GHt > self.h_min) & (distance_GHt < self.h_max)):
+
+                self.positions_toe = {
+                    "Ht": (Ht_x, Ht_y),
+                    "It": (It_x, It_y),
+                    "Jt": (Jt_x, Jt_y),
+                    "Kt": (Kt_x, Kt_y)
+                }
+
+            else:
+                return None
 
             return self.positions_toe
 

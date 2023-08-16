@@ -63,6 +63,7 @@ class Linkage5Bar:
         intersection_points = self.circle_intersection(M1, self.m1, M2, self.m2)
 
         if intersection_points is None:
+            # m1,m2からのx交点が計算できなかった
             return None
 
         X1, X2 = intersection_points

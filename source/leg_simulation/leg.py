@@ -12,7 +12,12 @@ class Leg:
 
     def compute_endeffector_position(self, theta_1, theta_2):
 
-        positions_5bar, blimit = self.linkage5bar.compute_all_positions(theta_1, theta_2)
+        result = self.linkage5bar.compute_all_positions(theta_1, theta_2)
+        if result is None:
+            print("5節リンク計算エラー X交点計算不可")
+        else:
+            positions_5bar, blimit = result
+
         if blimit == False:
             X = positions_5bar["X"]
             M1 = positions_5bar["M1"]

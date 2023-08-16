@@ -110,8 +110,11 @@ class PygameManager:
         for link in links_red_coordinates:
             pygame.draw.line(screen, (255, 0, 0), link[0], link[1], 2)
 
-        #distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
-        distance_GHt = math.sqrt((positions['G'][0]-positions['Ht'][0])**2 + (positions['G'][1]-positions['Ht'][1])**2)
+        if 'Ht' not in positions:
+            distance_GHt = None
+        else:
+            #distance_GH = math.sqrt((positions['G'][0]-positions['H'][0])**2 + (positions['G'][1]-positions['H'][1])**2)
+            distance_GHt = math.sqrt((positions['G'][0]-positions['Ht'][0])**2 + (positions['G'][1]-positions['Ht'][1])**2)
 
         # リミットなどの情報
         distance = distance_GHt
