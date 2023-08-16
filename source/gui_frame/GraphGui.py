@@ -14,6 +14,9 @@ THETA1_MAX = 0
 THETA2_MIN = -180
 THETA2_MAX = -90
 
+GROUND_MIN = -240
+GROUND_MAX = -100
+
 class GraphGui:
     def __init__(self, shared_data):
         self.shared_data = shared_data
@@ -40,6 +43,12 @@ class GraphGui:
         self.theta2_slider.set(-180)  # Set the default value for Theta2
         self.theta2_slider.pack(fill=tk.X, expand=True)
 
+        # ground slider settings
+        self.ground_slider = tk.Scale(self.root, from_=GROUND_MIN, to=GROUND_MAX, orient=tk.HORIZONTAL,
+                                 command=self.update_angles, label="Ground")
+        self.ground_slider.set(-180)  # Set the default value for Theta1
+        self.ground_slider.pack(fill=tk.X, expand=True)
+
         # Speed slider settings
         self.speed_slider = tk.Scale(self.root, from_=0, to=10, orient=tk.HORIZONTAL,
                                  command=self.update_speed, label="Speed")
@@ -54,9 +63,11 @@ class GraphGui:
     def update_angles(self, *args):
         theta1 = self.theta1_slider.get()
         theta2 = self.theta2_slider.get()
+        ground = self.ground_slider.get()
 
         # Update the robot's angles and recalculate its position
         self.robot.set_angles(theta1, theta2)
+        self.robot.set_ground(ground)
         self.robot.update_position()
 
     def update_speed(self, value):

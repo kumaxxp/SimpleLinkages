@@ -10,7 +10,7 @@ class Leg:
         self.linkagehoot = LinkageHoot(linkagehoot_params, self.linkage4bar)
         self.distance_B_M2 = 0.0
 
-    def compute_endeffector_position(self, theta_1, theta_2):
+    def compute_endeffector_position(self, theta_1, theta_2, ground):
 
         result = self.linkage5bar.compute_all_positions(theta_1, theta_2)
         if result is None:
@@ -30,7 +30,7 @@ class Leg:
             C = positions_4bar["C"]
             angle_AX = angles_4bar["angle_AX"]
 
-            positions_hoot = self.linkagehoot.compute_all_positions(B, C, theta_1, angle_AX)
+            positions_hoot = self.linkagehoot.compute_all_positions(B, C, theta_1, angle_AX, ground)
             endeffector_position = positions_hoot["E"]
 
         else:

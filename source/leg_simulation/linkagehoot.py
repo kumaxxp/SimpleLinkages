@@ -26,7 +26,7 @@ class LinkageHoot:
         self.fh= initial_parameters['fh']
         self.angle_E = 119.7
         self.angle_F = 42.0
-        self.distance = -0.180
+        self.ground = -0.180
 
         # 初期値
         self.Positions = {
@@ -45,7 +45,7 @@ class LinkageHoot:
 
 
 
-    def compute_all_positions(self, B: tuple, C: tuple, theta_1: float, angle_AX: float):
+    def compute_all_positions(self, B: tuple, C: tuple, theta_1: float, angle_AX: float, ground: float):
         B_x, B_y = B
         C_x, C_y = C
 
@@ -75,8 +75,7 @@ class LinkageHoot:
             self.base_positions = base_positions        
 
         # つま先の角度を計算する
-        # 暫定的にdistanceを20mmに固定する
-        toe_positions = self.calculate_toe_points(F, G, self.distance)
+        toe_positions = self.calculate_toe_points(F, G, ground)
         if toe_positions != None:
             self.toe_positions = toe_positions
 
@@ -132,6 +131,8 @@ class LinkageHoot:
         足底が浮いていて、つま先だけが地面に接している場合の座標を計算する
         groundがFから地面までの距離で、これはkよりも大きくなければならない
         """
+
+        print("ground = ", ground)
         F_x, F_y = F
 
         if (F_y - self.k) < ground:

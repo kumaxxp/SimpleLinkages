@@ -94,9 +94,10 @@ class Robot:
         self.theta_angle_2 = -115
         self.theta_1 = math.radians(self.theta_angle_1)
         self.theta_2 = math.radians(self.theta_angle_2)
+        self.ground = -0.180
 
         self.leg = Leg(self.linkage5bar_params, self.linkage4bar_params, self.linkagehoot_params)
-        endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2)
+        endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2, self.ground)
 
          # Initialize SharedData
         self.shared_data : SharedData = SharedData()
@@ -122,8 +123,13 @@ class Robot:
             self.theta_1 = math.radians(self.theta_angle_1)
             self.theta_2 = math.radians(self.theta_angle_2)
 
+    def set_ground(self, ground: float):
+        with self.lock:
+            print("ground = ", ground)
+            self.ground = ground/1000.0
+
     def update_position(self):
-        endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2)
+        endeffector_position = self.leg.compute_endeffector_position(self.theta_1, self.theta_2, self.ground)
 
     def get_distance_B2_X(self):
         return self.leg.get_distance_B2_X()
